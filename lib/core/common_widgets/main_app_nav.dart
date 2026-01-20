@@ -68,18 +68,12 @@ class AppBottomNav extends StatelessWidget {
             // Removes the default gray background from the system component
             // backgroundColor: Colors.red,
             elevation: 0,
-            // Hide labels so icons sit centered in the fixed-height bar
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.storefront_outlined),
                 selectedIcon: Icon(Icons.storefront),
                 label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                selectedIcon: Icon(Icons.grid_view),
-                label: 'Shop',
               ),
               NavigationDestination(
                 icon: Icon(Icons.shopping_cart_outlined),
@@ -90,6 +84,11 @@ class AppBottomNav extends StatelessWidget {
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person),
                 label: 'Profile',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.menu),
+                selectedIcon: Icon(Icons.menu),
+                label: 'Menu',
               ),
             ],
           ),
