@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:store/features/auth/data/session_store.dart';
 
 /// Simple auth API helper for account-related network calls.
 ///
@@ -34,5 +35,25 @@ class AuthApi {
       // You can parse error body here if your API returns message field
       throw Exception('Failed to create account (${response.statusCode})');
     }
+  }
+
+  /// Logs in with email/phone + password.
+  Future<UserSession> login({
+    required String emailOrPhone,
+    required String password,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/login');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': emailOrPhone, 'password': password}),
+    );
+
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(decoded['message'] ?? 'Login failed');
+    }
+
+    return UserSession.fromApi(decoded);
   }
 }
