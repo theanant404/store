@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:store/config/app_config.dart';
 import 'package:store/features/auth/data/session_store.dart';
 
 /// Simple auth API helper for account-related network calls.
-///
 /// Adjust [baseUrl] and endpoints to match your backend.
 class AuthApi {
   AuthApi({http.Client? client}) : _client = client ?? http.Client();
@@ -12,7 +12,7 @@ class AuthApi {
   final http.Client _client;
 
   /// Base URL for the authentication API.
-  static const String _baseUrl = 'http://localhost:8080/api/v1/auth';
+  String get _baseUrl => '${AppConfig.apiBaseUrl}/auth';
 
   /// Registers a new user with email/phone and password.
   /// Returns true when the call succeeds (status 200–299), otherwise throws.
