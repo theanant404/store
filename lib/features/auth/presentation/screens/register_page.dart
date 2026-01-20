@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/core/common_widgets/custom_snackbar.dart';
 import 'package:store/features/auth/data/auth_api.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -162,12 +163,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                     .trim();
 
                                 if (identifier.isEmpty || password.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
+                                  showWarningSnackBar(
+                                    context,
+                                    message:
                                         'Please enter email/phone and password',
-                                      ),
-                                    ),
                                   );
                                   return;
                                 }
@@ -183,12 +182,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                   );
 
                                   if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Account created successfully',
-                                      ),
-                                    ),
+                                  showSuccessSnackBar(
+                                    context,
+                                    message: 'Account created successfully! 🎉',
                                   );
 
                                   // Navigate to OTP verification to complete onboarding.
@@ -198,12 +194,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                   );
                                 } catch (e) {
                                   if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Failed to create account: $e',
-                                      ),
-                                    ),
+                                  showErrorSnackBar(
+                                    context,
+                                    message: 'Failed to create account: $e',
                                   );
                                 } finally {
                                   if (mounted) {
@@ -247,10 +240,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: OutlinedButton.icon(
                         onPressed: () {
                           // TODO: Implement Google sign-in
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Google sign-up pressed'),
-                            ),
+                          showInfoSnackBar(
+                            context,
+                            message: 'Google sign-in coming soon! 🚀',
                           );
                         },
                         icon: const Icon(Icons.g_mobiledata, size: 28),
