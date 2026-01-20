@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:store/core/common_widgets/logout_button.dart';
 import 'package:store/features/auth/data/session_store.dart';
+import 'package:store/features/categories/presentation/screens/categories_page.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
 
 class AccountPage extends StatefulWidget {
@@ -241,7 +242,7 @@ Widget _dashboardForRole(BuildContext context, String role) {
             'Categories',
             onTap: () => Navigator.of(
               context,
-            ).push(MaterialPageRoute(builder: (_) => const HomePage())),
+            ).push(MaterialPageRoute(builder: (_) => const CategoriesPage())),
           ),
           const _DashTile(Icons.price_change_outlined, 'Pricing & Discounts'),
           const _DashTile(Icons.settings, 'Shop Setting'),

@@ -47,3 +47,7 @@ app.*.map.json
 
 # end of .gitignore
 env.json
+
+
+# test md files 
+IMAGE_PICKER_FIX.md
