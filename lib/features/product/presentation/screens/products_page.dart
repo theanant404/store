@@ -267,7 +267,7 @@ class _ProductsPageState extends State<ProductsPage> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        'From \$${lowestPrice.toStringAsFixed(2)}',
+                                        'From  ₹${lowestPrice.toStringAsFixed(2)}',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green,
