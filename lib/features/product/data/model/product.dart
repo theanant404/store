@@ -83,7 +83,8 @@ class ProductModel {
   final List<ProductVariety> varieties;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    final images = json['imageUrls'] ?? json['image_urls'] ?? [];
+    final images =
+        json['imageUrls'] ?? json['image_urls'] ?? json['images'] ?? [];
     final varietiesJson = json['varieties'] ?? json['variants'] ?? [];
     return ProductModel(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
@@ -92,6 +93,7 @@ class ProductModel {
       categoryId:
           json['categoryId']?.toString() ??
           json['category_id']?.toString() ??
+          json['category']?.toString() ??
           '',
       imageUrls: List<String>.from(
         images is List ? images.map((e) => e.toString()) : const [],
@@ -107,8 +109,8 @@ class ProductModel {
       'id': id,
       'title': title,
       'description': description,
-      'categoryId': categoryId,
-      'imageUrls': imageUrls,
+      'category': categoryId,
+      'images': imageUrls,
       'varieties': varieties.map((v) => v.toJson()).toList(),
     };
   }

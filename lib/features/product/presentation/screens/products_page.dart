@@ -16,8 +16,6 @@ class ProductsPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductsPage> {
-  final _uuid = const Uuid();
-  List<ProductModel> _products = [];
   List<CategoryModel> _categories = [];
   String? _selectedCategoryId;
   String _searchQuery = '';
@@ -39,7 +37,6 @@ class _ProductsPageState extends State<ProductsPage> {
       if (!mounted) return;
       setState(() {
         _categories = results[0] as List<CategoryModel>;
-        _products = results[1] as List<ProductModel>;
       });
     } catch (e) {
       if (mounted) {
@@ -54,9 +51,10 @@ class _ProductsPageState extends State<ProductsPage> {
 
   Future<void> _refresh() async {
     try {
-      final products = await ProductRepository.fetchAllProducts();
+      await ProductRepository.fetchAllProducts();
       if (mounted) {
-        setState(() => _products = products);
+        // Products are cached in repository; trigger filter recompute via setState
+        setState(() {});
       }
     } catch (e) {
       if (mounted) {
@@ -391,7 +389,25 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _addImageUrl() async {
+    if (_imageUrls.length >= 4) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Maximum 4 images allowed')));
+      return;
+    }
+    final url = await showDialog<String?>(
+      context: context,
+      builder: (ctx) => const AddImageUrlDialog(),
+    );
+    if (url != null && url.isNotEmpty) {
+      setState(() {
+        _imageUrls.add(url);
+      });
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
     if (_imageUrls.length >= 4) {
       ScaffoldMessenger.of(
         context,
@@ -408,6 +424,34 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
         _imageUrls.add(file.path);
       });
     }
+  }
+
+  void _showImageOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.link_outlined),
+              title: const Text('Add Image URL'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _addImageUrl();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.image_outlined),
+              title: const Text('Pick from Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImageFromGallery();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _removeImage(int index) {
@@ -551,6 +595,16 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 100,
+                                    height: 100,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceVariant,
+                                    child: const Icon(
+                                      Icons.broken_image_outlined,
+                                    ),
+                                  ),
                                 ),
                         ),
                         Positioned(
@@ -572,14 +626,14 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
               const SizedBox(height: 12),
             ],
             ElevatedButton.icon(
-              onPressed: _imageUrls.length < 4 ? _pickImage : null,
+              onPressed: _imageUrls.length < 4 ? _showImageOptions : null,
               icon: const Icon(Icons.add_photo_alternate_outlined),
               label: Text('Add Image (${_imageUrls.length}/4)'),
             ),
             const SizedBox(height: 6),
             const Text(
-              'Use image URLs. Uploading local files is not supported yet.',
-              style: TextStyle(fontSize: 12, color: Colors.redAccent),
+              'Add images via URL or pick from gallery.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 20),
             Text('Varieties', style: Theme.of(context).textTheme.titleMedium),
@@ -617,11 +671,14 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
                   onPressed: () async {
                     final title = _titleCtrl.text.trim();
                     final desc = _descCtrl.text.trim();
-                    if (title.isEmpty || desc.isEmpty || _varieties.isEmpty) {
+                    if (title.isEmpty ||
+                        desc.isEmpty ||
+                        _varieties.isEmpty ||
+                        _imageUrls.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            'Title, description, and at least one variety are required',
+                            'Title, description, images, and at least one variety are required',
                           ),
                         ),
                       );
@@ -652,6 +709,70 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// --- Dialog widget for adding image URL ---
+class AddImageUrlDialog extends StatefulWidget {
+  const AddImageUrlDialog({super.key});
+
+  @override
+  State<AddImageUrlDialog> createState() => _AddImageUrlDialogState();
+}
+
+class _AddImageUrlDialogState extends State<AddImageUrlDialog> {
+  late final TextEditingController _urlCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _urlCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _urlCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final url = _urlCtrl.text.trim();
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('URL cannot be empty')));
+      return;
+    }
+    if (!url.startsWith('http')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('URL must start with http/https')),
+      );
+      return;
+    }
+    Navigator.pop(context, url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add Image URL'),
+      content: TextField(
+        controller: _urlCtrl,
+        decoration: const InputDecoration(
+          hintText: 'Enter image URL (e.g., https://...)',
+          labelText: 'Image URL',
+        ),
+        keyboardType: TextInputType.url,
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(onPressed: _submit, child: const Text('Add')),
+      ],
     );
   }
 }

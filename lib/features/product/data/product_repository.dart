@@ -30,8 +30,11 @@ class ProductRepository {
   }
 
   static Future<ProductModel> addProduct(ProductModel product) async {
+    print('🔍 Validating product...');
     _validate(product);
+    print('✅ Validation passed, calling API...');
     final created = await _api.createProduct(product);
+    print('✅ Product created: ${created.id}');
     _products.add(created);
     return created;
   }
@@ -62,11 +65,8 @@ class ProductRepository {
     if (product.varieties.isEmpty) {
       throw Exception('At least one variety is required');
     }
-    final hasLocalImages = product.imageUrls.any((u) => !u.startsWith('http'));
-    if (hasLocalImages) {
-      throw Exception(
-        'Please use image URLs. Upload from gallery not supported yet.',
-      );
+    if (product.imageUrls.isEmpty) {
+      throw Exception('At least one image is required');
     }
   }
 }
