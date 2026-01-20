@@ -56,4 +56,20 @@ class AuthApi {
 
     return UserSession.fromApi(decoded);
   }
+
+  /// Starts a password reset via email/phone.
+  Future<void> requestPasswordReset({required String email}) async {
+    final uri = Uri.parse('$_baseUrl/forgot-password');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'Failed to send reset link / OTP (${response.statusCode})',
+      );
+    }
+  }
 }
