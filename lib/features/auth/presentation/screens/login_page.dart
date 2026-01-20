@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:store/core/common_widgets/custom_snackbar.dart';
 import 'package:store/features/auth/data/auth_api.dart';
 import 'package:store/features/auth/data/session_store.dart';
+import 'package:store/features/auth/presentation/widgets/google_login_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -278,31 +279,15 @@ class _LoginPageState extends State<LoginPage> {
                           Expanded(child: Divider()),
                         ],
                       ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        height: 48,
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            showInfoSnackBar(
-                              context,
-                              message: 'Google sign-in coming soon! 🚀',
-                            );
-                          },
-                          icon: const Icon(Icons.g_mobiledata, size: 28),
-                          label: const Text('Continue with Google'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colorScheme.onSurface,
-                            side: BorderSide(
-                              color: colorScheme.outlineVariant.withOpacity(
-                                0.8,
-                              ),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            backgroundColor: colorScheme.surface,
-                          ),
-                        ),
+                      const SizedBox(height: 16),
+                      GoogleLoginButton(
+                        authApi: _authApi,
+                        onSuccess: () {
+                          // Handle successful login
+                        },
+                        onError: (e) {
+                          // Handle error
+                        },
                       ),
                     ],
                   ),
