@@ -147,23 +147,46 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         ),
                       ],
                     ),
-                    if (imageCtrl.text.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: _isRemote(imageCtrl.text)
-                            ? Image.network(
-                                imageCtrl.text,
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                File(imageCtrl.text),
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: _isRemote(imageCtrl.text)
+                          ? Image.network(
+                              imageCtrl.text,
+                              height: 180,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              headers: const {
+                                'User-Agent':
+                                    'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Mobile/15E148 Safari/604.1',
+                                'Accept': '*/*',
+                                'Accept-Language': 'en-US,en;q=0.9',
+                                'Referer': 'https://pixabay.com/',
+                              },
+                              cacheWidth: 300,
+                              cacheHeight: 300,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      height: 180,
+                                      color: Theme.of(
+                                        ctx,
+                                      ).colorScheme.surfaceVariant,
+                                      child: const Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                              errorBuilder: (context, error, stackTrace) {
+                                print('Preview image loading error: $error');
+                                return Container(
                                   height: 180,
                                   color: Theme.of(
                                     ctx,
@@ -173,10 +196,25 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                     Icons.broken_image_outlined,
                                     size: 42,
                                   ),
+                                );
+                              },
+                            )
+                          : Image.file(
+                              File(imageCtrl.text),
+                              height: 180,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                height: 180,
+                                color: Theme.of(ctx).colorScheme.surfaceVariant,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.broken_image_outlined,
+                                  size: 42,
                                 ),
                               ),
-                      ),
-                    ],
+                            ),
+                    ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: descCtrl,
@@ -269,6 +307,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Widget _buildCategoryImage(CategoryModel c, ColorScheme color) {
     if (c.imageUrl != null && c.imageUrl!.isNotEmpty) {
       final url = c.imageUrl!;
+      // print("url: $url");
       if (_isRemote(url)) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(8),
@@ -277,12 +316,42 @@ class _CategoriesPageState extends State<CategoriesPage> {
             width: 52,
             height: 52,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              width: 52,
-              height: 52,
-              color: color.surfaceVariant,
-              child: const Icon(Icons.broken_image_outlined),
-            ),
+            // Add headers for better compatibility with CDNs like Pixabay
+            headers: const {
+              'User-Agent':
+                  'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Mobile/15E148 Safari/604.1',
+              'Accept': '*/*',
+              'Accept-Language': 'en-US,en;q=0.9',
+            },
+            // Enable caching
+            cacheWidth: 52,
+            cacheHeight: 52,
+            // Better error handling
+            errorBuilder: (context, error, stackTrace) {
+              print('Image loading error for $url: $error');
+              return Container(
+                width: 52,
+                height: 52,
+                color: color.surfaceVariant,
+                child: const Icon(Icons.broken_image_outlined),
+              );
+            },
+            // Show loading indicator while fetching
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                width: 52,
+                height: 52,
+                color: color.surfaceVariant,
+                child: const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            },
           ),
         );
       } else {
