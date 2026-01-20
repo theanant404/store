@@ -93,4 +93,65 @@ class AuthApi {
       throw Exception('Failed to reset password (${response.statusCode})');
     }
   }
+
+  Future<UserSession> loginWithOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/login-with-otp');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(decoded['message'] ?? 'Login with OTP failed');
+    }
+
+    return UserSession.fromApi(decoded);
+  }
+
+  /// Verifies an OTP for the given phone number.
+  Future<void> verifyOtp({required String email, required String otp}) async {
+    final uri = Uri.parse('$_baseUrl/verify-otp');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('OTP verification failed (${response.statusCode})');
+    }
+  }
+
+  /// Requests an OTP for the given email.
+  Future<void> sendOtp({required String email}) async {
+    final uri = Uri.parse('$_baseUrl/resend-email-otp');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Failed to send OTP (${response.statusCode})');
+    }
+  }
+
+  /// Requests an OTP for email verification.
+  Future<void> sendEmailOtp({required String email}) async {
+    final uri = Uri.parse('$_baseUrl/resend-email-otp');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Failed to send email OTP (${response.statusCode})');
+    }
+  }
 }
