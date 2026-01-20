@@ -81,7 +81,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 24),
               Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.background,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(

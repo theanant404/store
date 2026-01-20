@@ -115,7 +115,7 @@ class _LoginWithOtpRequestPageState extends State<LoginWithOtpRequestPage> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
-                  color: colorScheme.background,
+                  color: colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),

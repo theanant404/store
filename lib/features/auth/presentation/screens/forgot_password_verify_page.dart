@@ -152,7 +152,7 @@ class _ForgotPasswordVerifyPageState extends State<ForgotPasswordVerifyPage> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
-                  color: colorScheme.background,
+                  color: colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),
