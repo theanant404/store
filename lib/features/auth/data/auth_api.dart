@@ -72,4 +72,25 @@ class AuthApi {
       );
     }
   }
+
+  Future<void> resetPasswordWithOtp({
+    required String identifier,
+    required String otp,
+    required String newPassword,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/reset-password');
+    final response = await _client.post(
+      uri,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode(<String, dynamic>{
+        'email': identifier,
+        'otp': otp,
+        'password': newPassword,
+      }),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Failed to reset password (${response.statusCode})');
+    }
+  }
 }
