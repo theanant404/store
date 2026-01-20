@@ -1,14 +1,12 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 import 'package:store/config/app_config.dart';
+import 'package:store/core/network/api_client.dart';
 import 'models/category.dart';
 
 /// Category API helper for fetching and managing categories from the backend.
 class CategoryApi {
-  CategoryApi({http.Client? client}) : _client = client ?? http.Client();
+  CategoryApi({ApiClient? client}) : _client = client ?? ApiClient();
 
-  final http.Client _client;
+  final ApiClient _client;
 
   /// Base URL for the category API.
   String get _baseUrl => '${AppConfig.apiBaseUrl}/categories';
@@ -16,17 +14,13 @@ class CategoryApi {
   /// Fetch all categories from the database.
   Future<List<CategoryModel>> getAllCategories() async {
     try {
-      final uri = Uri.parse(_baseUrl);
-      final response = await _client.get(
-        uri,
-        headers: const {'Content-Type': 'application/json'},
-      );
+      final response = await _client.get(_baseUrl);
 
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      if (!_client.isSuccess(response)) {
         throw Exception('Failed to fetch categories (${response.statusCode})');
       }
 
-      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final decoded = _client.decodeResponse(response);
       final categoriesJson = decoded['data'] ?? decoded['categories'] ?? [];
 
       return (categoriesJson as List)
@@ -39,27 +33,23 @@ class CategoryApi {
 
   /// Add a new category to the database.
   Future<CategoryModel> addCategory(CategoryModel category) async {
-    print(category);
     try {
-      final uri = Uri.parse(_baseUrl);
-
       final response = await _client.post(
-        uri,
-        headers: const {'Content-Type': 'application/json'},
-        body: jsonEncode({
+        _baseUrl,
+        body: {
           'title': category.title,
           'slug': category.slug,
           'description': category.description,
           'imageUrl': category.imageUrl,
-        }),
+        },
       );
 
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-        throw Exception(decoded['message'] ?? 'Failed to add category');
+      if (!_client.isSuccess(response)) {
+        final errorMsg = _client.getErrorMessage(response);
+        throw Exception(errorMsg);
       }
 
-      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final decoded = _client.decodeResponse(response);
       return CategoryModel.fromJson(decoded['data'] as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Error adding category: $e');
@@ -69,24 +59,22 @@ class CategoryApi {
   /// Update an existing category in the database.
   Future<CategoryModel> updateCategory(CategoryModel category) async {
     try {
-      final uri = Uri.parse('$_baseUrl/${category.id}');
       final response = await _client.put(
-        uri,
-        headers: const {'Content-Type': 'application/json'},
-        body: jsonEncode({
+        '$_baseUrl/${category.id}',
+        body: {
           'title': category.title,
           'slug': category.slug,
           'description': category.description,
           'imageUrl': category.imageUrl,
-        }),
+        },
       );
 
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-        throw Exception(decoded['message'] ?? 'Failed to update category');
+      if (!_client.isSuccess(response)) {
+        final errorMsg = _client.getErrorMessage(response);
+        throw Exception(errorMsg);
       }
 
-      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final decoded = _client.decodeResponse(response);
       return CategoryModel.fromJson(decoded['data'] as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Error updating category: $e');
@@ -96,15 +84,11 @@ class CategoryApi {
   /// Delete a category from the database.
   Future<void> deleteCategory(String id) async {
     try {
-      final uri = Uri.parse('$_baseUrl/$id');
-      final response = await _client.delete(
-        uri,
-        headers: const {'Content-Type': 'application/json'},
-      );
+      final response = await _client.delete('$_baseUrl/$id');
 
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-        throw Exception(decoded['message'] ?? 'Failed to delete category');
+      if (!_client.isSuccess(response)) {
+        final errorMsg = _client.getErrorMessage(response);
+        throw Exception(errorMsg);
       }
     } catch (e) {
       throw Exception('Error deleting category: $e');
