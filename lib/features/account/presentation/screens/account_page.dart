@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:store/features/auth/data/session_store.dart';
+import 'package:store/features/home/presentation/screens/home_page.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -22,7 +23,7 @@ class _AccountPageState extends State<AccountPage> {
               // Welcome Section
               Center(
                 child: Text(
-                  user == null ? 'Welcome!' : 'Welcome back, ${user.name}!',
+                  user == null ? 'Welcome!' : "",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -149,7 +150,9 @@ class _AccountPageState extends State<AccountPage> {
                               color: Colors.green,
                             ),
                             title: const Text('Cash on Delivery Offers'),
-                            subtitle: const Text('Save more with Cash on Delivery'),
+                            subtitle: const Text(
+                              'Save more with Cash on Delivery',
+                            ),
                             onTap: () {},
                           ),
                           ListTile(
@@ -170,27 +173,12 @@ class _AccountPageState extends State<AccountPage> {
                 ),
               ] else ...[
                 // User logged in section
-                Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.person),
-                      title: const Text('Profile Settings'),
-                      trailing: const Icon(Icons.chevron_right),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.lock),
-                      title: const Text('Change Password'),
-                      trailing: const Icon(Icons.chevron_right),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text('Logout'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        SessionStore.clear();
-                      },
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  child: _dashboardForRole(context, user.role),
                 ),
               ],
 
@@ -208,32 +196,7 @@ class _AccountPageState extends State<AccountPage> {
                 title: Text('About'),
                 trailing: Icon(Icons.chevron_right),
               ),
-
               const Divider(),
-
-              // Dashboard Section (when logged in)
-              if (user != null) ...[
-                const SizedBox(height: 8),
-                const Text(
-                  'Dashboard',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                ),
-                const SizedBox(height: 6),
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: _dashboardForRole(context, user.role),
-                  ),
-                ),
-                const Divider(),
-              ],
             ],
           );
         },
@@ -243,56 +206,117 @@ class _AccountPageState extends State<AccountPage> {
 }
 
 Widget _dashboardForRole(BuildContext context, String role) {
-  final color = Theme.of(context).colorScheme;
-  switch (role) {
-    case 'admin':
+  final upper = role.toUpperCase();
+  switch (upper) {
+    case 'ADMIN':
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Admin Dashboard',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color.primary,
-            ),
+          const _DashHeader('Orders & Fulfillment'),
+          const _DashTile(Icons.receipt_long_outlined, 'All Orders'),
+          const _DashTile(
+            Icons.local_shipping_outlined,
+            'Shipments & Delivery SLAs',
           ),
-          const SizedBox(height: 8),
-          const Text('Manage users, products, and view reports.'),
+          const _DashTile(
+            Icons.assignment_return_outlined,
+            'Returns & Refunds',
+          ),
+          const _DashHeader('Products & Inventory'),
+          _DashTile(
+            Icons.inventory_2_outlined,
+            'Products',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const HomePage())),
+          ),
+          _DashTile(
+            Icons.category_outlined,
+            'Categories',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const HomePage())),
+          ),
+          const _DashTile(Icons.price_change_outlined, 'Pricing & Discounts'),
+          const _DashTile(Icons.settings,'Shop Setting'),
+          const _DashHeader('People & Access'),
+          const _DashTile(Icons.group_outlined, 'Users & Roles'),
+          const _DashTile(Icons.support_agent_outlined, 'Support Tickets'),
+          const _DashHeader('System'),
+          const _DashTile(Icons.analytics_outlined, 'Analytics & Reports'),
+          const _DashTile(Icons.security_outlined, 'Security / Audit Logs'),
+          const _DashTile(Icons.settings_outlined, 'Settings'),
+          
         ],
       );
-    case 'seller':
+    case 'STAFF':
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Seller Dashboard',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text('Manage your products and view sales.'),
+        children: const [
+          _DashHeader('Staff Dashboard'),
+          _DashTile(Icons.receipt_long_outlined, 'Manage Orders'),
+          _DashTile(Icons.inventory_2_outlined, 'Update Inventory'),
+          _DashTile(Icons.support_agent_outlined, 'Customer Support'),
         ],
       );
-    case 'user':
+    case 'DELHIVERY':
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          _DashTile(Icons.local_shipping_outlined, 'Assigned Deliveries'),
+          _DashTile(Icons.map_outlined, 'Routes / Maps'),
+          _DashTile(
+            Icons.assignment_turned_in_outlined,
+            'Completed Deliveries',
+          ),
+        ],
+      );
+    case 'USER':
     default:
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Account',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text('View your orders and wishlist.'),
+        children: const [
+          _DashTile(Icons.favorite_border, 'Wishlist'),
+          _DashTile(Icons.receipt_long_outlined, 'My Orders'),
+          _DashTile(Icons.location_on_outlined, 'Addresses'),
         ],
       );
+  }
+}
+
+class _DashHeader extends StatelessWidget {
+  const _DashHeader(this.title);
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 6),
+      child: Text(
+        title,
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _DashTile extends StatelessWidget {
+  const _DashTile(this.icon, this.title, {this.onTap});
+  final IconData icon;
+  final String title;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, size: 20),
+      title: Text(title),
+      trailing: const Icon(Icons.chevron_right, size: 18),
+      onTap: onTap ?? () {},
+    );
   }
 }
