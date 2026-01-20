@@ -485,6 +485,16 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Ensure dropdown value is valid; otherwise fallback to null
+            Builder(
+              builder: (context) {
+                final ids = widget.categories.map((c) => c.id).toSet();
+                if (!ids.contains(_selectedCategoryId)) {
+                  _selectedCategoryId = widget.categories.first.id;
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             Text(
               widget.existingProduct == null ? 'Add Product' : 'Edit Product',
               style: Theme.of(context).textTheme.titleLarge,
@@ -508,7 +518,9 @@ class _ProductFormSheetState extends State<ProductFormSheet> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _selectedCategoryId,
+              value: widget.categories.any((c) => c.id == _selectedCategoryId)
+                  ? _selectedCategoryId
+                  : null,
               decoration: const InputDecoration(
                 labelText: 'Category',
                 prefixIcon: Icon(Icons.category_outlined),
