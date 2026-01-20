@@ -11,12 +11,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
-  final _pages = const [
-    HomePage(),
-    // ProductsPage(),
-    // CartPage(),
-    // AccountPage(),
-  ];
+  final _pages = const [HomePage()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
