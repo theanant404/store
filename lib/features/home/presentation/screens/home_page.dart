@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:store/features/categories/data/models/category.dart';
 import 'package:store/features/home/data/home_api.dart';
+import 'package:store/features/product/data/model/product.dart';
+import 'package:store/features/product/data/product_repository.dart';
+import 'package:store/features/product/presentation/screens/product_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,22 +20,22 @@ class _LandingPageState extends State<HomePage> {
 
   List<CategoryModel> _categories = [];
   bool _isLoadingCategories = false;
+  List<ProductModel> _products = [];
+  bool _isLoadingProducts = false;
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _loadProducts();
   }
 
   Future<void> _loadCategories() async {
     setState(() => _isLoadingCategories = true);
     try {
       final cats = await _categoryApi.getAllCategories();
-      if (mounted) {
-        setState(() => _categories = cats);
-      }
+      if (mounted) setState(() => _categories = cats);
     } catch (e) {
-      // Show a simple error indicator
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load categories: $e')),
@@ -41,13 +46,28 @@ class _LandingPageState extends State<HomePage> {
     }
   }
 
+  Future<void> _loadProducts() async {
+    setState(() => _isLoadingProducts = true);
+    try {
+      final prods = await ProductRepository.fetchAllProducts();
+      if (mounted) setState(() => _products = prods);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingProducts = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         slivers: [
-          // 1. Beautiful App Bar
           const SliverAppBar(
             floating: true,
             title: Text(
@@ -75,20 +95,15 @@ class _LandingPageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 2. Offers Carousel
                 _buildCarousel(),
-
-                // 3. Category Section
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    "Categories",
+                    'Categories',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 _buildCategoryList(),
-
-                // 4. Product Section Header
                 const Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -98,14 +113,14 @@ class _LandingPageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Featured Products",
+                        'Featured Products',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        "See All",
+                        'See All',
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.w600,
@@ -118,21 +133,9 @@ class _LandingPageState extends State<HomePage> {
             ),
           ),
 
-          // 5. Product Grid
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildProductCard(index),
-                childCount: 4, // Number of items
-              ),
-            ),
+            sliver: _buildProductGrid(),
           ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 30)),
@@ -141,7 +144,6 @@ class _LandingPageState extends State<HomePage> {
     );
   }
 
-  // Carousel Widget
   Widget _buildCarousel() {
     return SizedBox(
       height: 180,
@@ -175,23 +177,25 @@ class _LandingPageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "FLASH SALE",
+                        'FLASH SALE',
                         style: TextStyle(
                           color: Colors.white,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      SizedBox(height: 8),
                       Text(
-                        "Up to 70% OFF",
+                        'Up to 60% off',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 8),
                       Text(
-                        "On all electronics",
+                        'Limited time deals on top brands',
                         style: TextStyle(color: Colors.white70),
                       ),
                     ],
@@ -205,7 +209,6 @@ class _LandingPageState extends State<HomePage> {
     );
   }
 
-  // Category List Widget (uses live categories)
   Widget _buildCategoryList() {
     if (_isLoadingCategories) {
       return const SizedBox(
@@ -271,66 +274,132 @@ class _LandingPageState extends State<HomePage> {
     );
   }
 
-  // Product Card Widget
-  Widget _buildProductCard(int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+  Widget _buildProductGrid() {
+    if (_isLoadingProducts) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 32),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (_products.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 32),
+          child: Center(child: Text('No products available')),
+        ),
+      );
+    }
+
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => _buildProductCard(_products[index]),
+        childCount: _products.length,
+      ),
+    );
+  }
+
+  Widget _buildProductCard(ProductModel product) {
+    final price = product.varieties.isNotEmpty
+        ? product.varieties.map((v) => v.price).reduce((a, b) => a < b ? a : b)
+        : 0.0;
+    final image = product.imageUrls.isNotEmpty ? product.imageUrls.first : null;
+    final isRemote = image != null && image.startsWith('http');
+
+    final Widget imageWidget;
+    if (image == null) {
+      imageWidget = const Center(
+        child: Icon(Icons.image, size: 50, color: Colors.blue),
+      );
+    } else if (isRemote) {
+      imageWidget = Image.network(
+        image,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            const Center(child: Icon(Icons.broken_image_outlined)),
+      );
+    } else {
+      imageWidget = Image.file(
+        File(image),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            const Center(child: Icon(Icons.broken_image_outlined)),
+      );
+    }
+
+    return InkWell(
+      onTap: () => _openProductDetail(product),
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(15),
                 ),
-              ),
-              child: const Center(
-                child: Icon(Icons.image, size: 50, color: Colors.blue),
+                child: Container(color: Colors.blue[50], child: imageWidget),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Product Item",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "\$99.00",
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: List.generate(
-                    5,
-                    (i) =>
-                        const Icon(Icons.star, size: 12, color: Colors.amber),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$${price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Row(
+                    children: List.generate(
+                      5,
+                      (i) =>
+                          const Icon(Icons.star, size: 12, color: Colors.amber),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _openProductDetail(ProductModel product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ProductDetailPage(product: product)),
     );
   }
 }
