@@ -1,25 +1,37 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:store/features/cart/data/services/cart_service.dart';
 import 'package:store/features/product/data/model/product.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key, required this.product});
 
   final ProductModel product;
 
-  bool _isRemote(String? url) => url != null && url.startsWith('http');
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
 
-  double _lowestPrice() {
-    if (product.varieties.isEmpty) return 0;
-    return product.varieties
-        .map((v) => v.price)
-        .reduce((a, b) => a < b ? a : b);
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  late ProductVariety _selectedVariety;
+  int _quantity = 1;
+  final CartService _cartService = CartService();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedVariety = widget.product.varieties.isNotEmpty
+        ? widget.product.varieties.first
+        : ProductVariety(id: '0', price: 0);
   }
+
+  ProductModel get product => widget.product;
+
+  bool _isRemote(String? url) => url != null && url.startsWith('http');
 
   @override
   Widget build(BuildContext context) {
-    final price = _lowestPrice();
     return Scaffold(
       appBar: AppBar(title: Text(product.title)),
       body: SingleChildScrollView(
@@ -35,7 +47,7 @@ class ProductDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '\u20b9${price.toStringAsFixed(2)}',
+              '₹${_selectedVariety.price.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -52,20 +64,77 @@ class ProductDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
             if (product.varieties.isNotEmpty) ...[
               const Text(
-                'Available Options',
+                'Select Option',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...product.varieties.map(
-                (v) => Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text('₹${v.price.toStringAsFixed(2)}'),
-                    subtitle: _buildVarietySubtitle(v),
-                    trailing: v.stock > 0
-                        ? const Chip(label: Text('In Stock'))
-                        : const Chip(label: Text('Out of Stock')),
-                  ),
+              DropdownButton<ProductVariety>(
+                isExpanded: true,
+                value: _selectedVariety,
+                items: product.varieties
+                    .map(
+                      (v) => DropdownMenuItem(
+                        value: v,
+                        child: Text(
+                          '₹${v.price.toStringAsFixed(2)} ${_buildVarietyLabel(v)}',
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) setState(() => _selectedVariety = v);
+                },
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Quantity',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: _quantity > 1
+                              ? () => setState(() => _quantity--)
+                              : null,
+                          icon: const Icon(Icons.remove),
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            '$_quantity',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed:
+                              _quantity <
+                                  (_selectedVariety.stock > 0
+                                      ? _selectedVariety.stock
+                                      : 10)
+                              ? () => setState(() => _quantity++)
+                              : null,
+                          icon: const Icon(Icons.add),
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -81,11 +150,21 @@ class ProductDetailPage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Added to cart (placeholder)')),
-                );
-              },
+              onPressed: _selectedVariety.stock > 0
+                  ? () {
+                      _cartService.addItem(
+                        product: product,
+                        variety: _selectedVariety,
+                        quantity: _quantity,
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Added $_quantity item(s) to cart'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  : null,
               icon: const Icon(Icons.add_shopping_cart),
               label: const Text('Add to Cart'),
             ),
@@ -95,14 +174,12 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVarietySubtitle(ProductVariety v) {
+  String _buildVarietyLabel(ProductVariety v) {
     final pieces = <String>[];
-    if (v.weight != null) pieces.add('${v.weight} kg');
+    if (v.weight != null) pieces.add('${v.weight}kg');
     if (v.quantity != null) pieces.add('${v.quantity}${v.quantityUnit ?? ''}');
-    if (v.discount != null) pieces.add('Discount ${v.discount}%');
-    return pieces.isEmpty
-        ? const Text('')
-        : Text(pieces.join(' · '), style: const TextStyle(fontSize: 13));
+    if (v.discount != null) pieces.add('${v.discount}% off');
+    return pieces.isEmpty ? '' : '(${pieces.join(', ')})';
   }
 
   Widget _buildImageGallery() {
