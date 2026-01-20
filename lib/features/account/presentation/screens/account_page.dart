@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:store/core/common_widgets/logout_button.dart';
 import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/categories/presentation/screens/categories_page.dart';
-import 'package:store/features/home/presentation/screens/home_page.dart';
+import 'package:store/features/product/presentation/screens/products_page.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -235,7 +235,7 @@ Widget _dashboardForRole(BuildContext context, String role) {
             'Products',
             onTap: () => Navigator.of(
               context,
-            ).push(MaterialPageRoute(builder: (_) => const HomePage())),
+            ).push(MaterialPageRoute(builder: (_) => const ProductsPage())),
           ),
           _DashTile(
             Icons.category_outlined,
