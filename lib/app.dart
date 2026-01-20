@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/core/theme/app_theme.dart';
 import 'package:store/features/navigation/app_navigation.dart';
 
 class MyApp extends StatelessWidget {
@@ -8,6 +9,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Store',
+      theme: AppTheme.light(),
       debugShowCheckedModeBanner: false,
       home: const AppShell(),
       routes: {},
