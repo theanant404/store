@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/core/common_widgets/logout_button.dart';
 import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
 
@@ -178,7 +179,12 @@ class _AccountPageState extends State<AccountPage> {
                     horizontal: 12,
                     vertical: 10,
                   ),
-                  child: _dashboardForRole(context, user.role),
+                  child: Column(
+                    children: [
+                      _dashboardForRole(context, user.role),
+                      const LogoutButton(),
+                    ],
+                  ),
                 ),
               ],
 
@@ -238,7 +244,7 @@ Widget _dashboardForRole(BuildContext context, String role) {
             ).push(MaterialPageRoute(builder: (_) => const HomePage())),
           ),
           const _DashTile(Icons.price_change_outlined, 'Pricing & Discounts'),
-          const _DashTile(Icons.settings,'Shop Setting'),
+          const _DashTile(Icons.settings, 'Shop Setting'),
           const _DashHeader('People & Access'),
           const _DashTile(Icons.group_outlined, 'Users & Roles'),
           const _DashTile(Icons.support_agent_outlined, 'Support Tickets'),
@@ -246,7 +252,6 @@ Widget _dashboardForRole(BuildContext context, String role) {
           const _DashTile(Icons.analytics_outlined, 'Analytics & Reports'),
           const _DashTile(Icons.security_outlined, 'Security / Audit Logs'),
           const _DashTile(Icons.settings_outlined, 'Settings'),
-          
         ],
       );
     case 'STAFF':
