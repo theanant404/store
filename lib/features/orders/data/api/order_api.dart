@@ -64,7 +64,7 @@ class OrderApi {
         '$_baseUrl/$orderId/status',
         body: {'status': status},
       );
-      print('bodyResponse: ${response.body}');
+      // print('bodyResponse: ${response.body}');
 
       if (!_client.isSuccess(response)) {
         throw Exception(

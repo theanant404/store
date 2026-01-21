@@ -27,19 +27,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     setState(() => _isUpdating = true);
 
     try {
-      final updatedOrder = await _orderApi.updateOrderStatus(
+      final serverStatus = await _orderApi.updateOrderStatus(
         _order.id,
         newStatus,
       );
       setState(() {
-        _order = updatedOrder;
+        _order = _order.copyWith(status: serverStatus);
         _isUpdating = false;
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order status updated to $newStatus'),
+            content: Text('Order status updated to ${_order.status}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -113,6 +113,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     switch (status.toLowerCase()) {
       case 'pending':
         return Colors.orange;
+      case 'confirmed':
+        return Colors.blue; // treat confirmed similar to accepted
       case 'accepted':
         return Colors.blue;
       case 'preparing':
@@ -271,7 +273,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                               width: double.infinity,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: () => _updateOrderStatus('accepted'),
+                                onPressed: () =>
+                                    _updateOrderStatus('confirmed'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   shape: RoundedRectangleBorder(
@@ -305,6 +308,29 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   'Mark as Preparing',
                                   style: TextStyle(
                                     fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                          if (_order.status == 'confirmed')
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () => _updateOrderStatus('shipped'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Ready to Ship',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
