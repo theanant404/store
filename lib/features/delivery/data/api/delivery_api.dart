@@ -46,7 +46,7 @@ class DeliveryApi {
   Future<List<DeliveryOrderModel>> getDeliveredOrders() async {
     try {
       final response = await _client.get('$_baseUrl/delivered');
-      // print(response.body);
+      print(response.body);
       if (!_client.isSuccess(response)) {
         throw Exception(
           'Failed to fetch shipped orders (${response.statusCode})',

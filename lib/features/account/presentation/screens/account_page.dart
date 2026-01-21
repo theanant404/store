@@ -3,6 +3,7 @@ import 'package:store/core/common_widgets/logout_button.dart';
 import 'package:store/features/address/presentation/screens/user_address_page.dart';
 import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/categories/presentation/screens/categories_page.dart';
+import 'package:store/features/delivery/presentation/screens/delivered_order_page.dart';
 import 'package:store/features/delivery/presentation/screens/delivery_page.dart';
 import 'package:store/features/orders/presentation/screens/orders_page.dart';
 import 'package:store/features/product/presentation/screens/products_page.dart';
@@ -292,9 +293,12 @@ Widget _dashboardForRole(BuildContext context, String role) {
             ).push(MaterialPageRoute(builder: (_) => const DeliveryPage())),
           ),
           const _DashTile(Icons.map_outlined, 'Routes / Maps'),
-          const _DashTile(
+          _DashTile(
             Icons.assignment_turned_in_outlined,
             'Completed Deliveries',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DeliveredOrderPage()),
+            ),
           ),
         ],
       );
