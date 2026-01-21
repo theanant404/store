@@ -6,6 +6,7 @@ import 'package:store/features/auth/presentation/screens/login_page.dart';
 import 'package:store/features/auth/presentation/screens/login_with_otp_verify_page.dart';
 import 'package:store/features/auth/presentation/screens/logn_with_otp.dart';
 import 'package:store/features/auth/presentation/screens/register_page.dart';
+import 'package:store/features/cart/presentation/screens/cart_page.dart';
 import 'package:store/features/navigation/app_navigation.dart';
 
 class MyApp extends StatelessWidget {
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
             const ForgotPasswordVerifyPage(),
         '/login-otp-request': (context) => const LoginWithOtpRequestPage(),
         '/login-with-otp-verify': (context) => const LoginWithOtpPage(),
+        '/cart': (context) => const CartPage(),
       },
     );
   }
