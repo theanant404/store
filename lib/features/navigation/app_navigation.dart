@@ -7,6 +7,7 @@ import 'package:store/features/cart/presentation/screens/cart_page.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
 import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/presentation/screens/product_detail_page.dart';
+import 'package:store/features/navigation/menu_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -25,6 +26,7 @@ class _AppShellState extends State<AppShell> {
   final CartService _cartService = CartService();
   late TextEditingController _searchController;
   String _searchQuery = '';
+  String _menuQuery = '';
 
   @override
   void initState() {
@@ -46,6 +48,20 @@ class _AppShellState extends State<AppShell> {
 
   void _onSearchChanged(String query) {
     setState(() => _searchQuery = query);
+  }
+
+  void updateSearchQuery(String query) {
+    _searchController.text = query;
+    setState(() => _searchQuery = query);
+  }
+
+  void navigateToMenuWithQuery(String query) {
+    _menuQuery = query;
+    _searchController.text = query;
+    setState(() {
+      _searchQuery = query;
+      _index = 3; // menu tab
+    });
   }
 
   void navigateToCart() {
@@ -76,6 +92,7 @@ class _AppShellState extends State<AppShell> {
               child: AppSearchField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
+                onSubmitted: navigateToMenuWithQuery,
               ),
             ),
             // Page Content
@@ -88,7 +105,7 @@ class _AppShellState extends State<AppShell> {
                         HomePage(searchQuery: _searchQuery),
                         const CartPage(),
                         const AccountPage(),
-                        const Center(child: Text('Menu Page')),
+                        MenuPage(searchQuery: _menuQuery),
                       ],
                     ),
             ),

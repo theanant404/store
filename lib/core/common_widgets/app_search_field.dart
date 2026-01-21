@@ -5,12 +5,14 @@ class AppSearchField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onChanged,
+    this.onSubmitted,
     this.onFilterTap,
     this.onNotificationTap,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
   final VoidCallback? onFilterTap;
   final VoidCallback? onNotificationTap;
 
@@ -38,6 +40,7 @@ class AppSearchField extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 onChanged: onChanged,
+                onSubmitted: onSubmitted,
                 style: const TextStyle(fontSize: 16, color: Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Search for products...',
