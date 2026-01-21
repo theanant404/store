@@ -4,6 +4,8 @@ import 'package:store/core/common_widgets/main_app_nav.dart';
 import 'package:store/features/account/presentation/screens/account_page.dart';
 import 'package:store/features/cart/data/services/cart_service.dart';
 import 'package:store/features/cart/presentation/screens/cart_page.dart';
+import 'package:store/features/delivery/presentation/screens/delivered_order_page.dart';
+import 'package:store/features/delivery/presentation/screens/delivery_page.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
 import 'package:store/features/menu/presentation/screens/menu_page.dart';
 import 'package:store/features/product/data/model/product.dart';
@@ -87,6 +89,20 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
+  void navigateToDelivery() {
+    setState(() {
+      _index = 5;
+      _selectedProduct = null;
+    });
+  }
+
+  void navigateToDeliveredOrders() {
+    setState(() {
+      _index = 6;
+      _selectedProduct = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Now use this string to filter your list from MongoDB!
@@ -122,6 +138,8 @@ class _AppShellState extends State<AppShell> {
                         MenuPage(searchQuery: _menuQuery),
                         const AccountPage(),
                         const UsersPage(),
+                        const DeliveryPage(),
+                        const DeliveredOrderPage(),
                       ],
                     ),
             ),
