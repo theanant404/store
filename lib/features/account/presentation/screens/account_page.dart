@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:store/core/common_widgets/logout_button.dart';
+import 'package:store/features/address/presentation/screens/user_address_page.dart';
 import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/categories/presentation/screens/categories_page.dart';
 import 'package:store/features/product/presentation/screens/products_page.dart';
@@ -281,10 +282,18 @@ Widget _dashboardForRole(BuildContext context, String role) {
     default:
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          _DashTile(Icons.favorite_border, 'Wishlist'),
-          _DashTile(Icons.receipt_long_outlined, 'My Orders'),
-          _DashTile(Icons.location_on_outlined, 'Addresses'),
+        children: [
+          const _DashHeader('My Account'),
+          const _DashTile(Icons.person_outline, 'Profile'),
+          const _DashTile(Icons.favorite_border, 'Wishlist'),
+          const _DashTile(Icons.receipt_long_outlined, 'My Orders'),
+          _DashTile(
+            Icons.location_on_outlined,
+            'Addresses',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const UserAddressPage())),
+          ),
         ],
       );
   }
