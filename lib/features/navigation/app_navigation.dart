@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:store/core/common_widgets/main_app_nav.dart';
 import 'package:store/features/account/presentation/screens/account_page.dart';
+import 'package:store/features/cart/data/services/cart_service.dart';
 import 'package:store/features/cart/presentation/screens/cart_page.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
 import 'package:store/features/product/data/model/product.dart';
@@ -20,6 +21,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
   ProductModel? _selectedProduct;
+  final CartService _cartService = CartService();
 
   final _pages = const [
     HomePage(),
@@ -27,6 +29,22 @@ class _AppShellState extends State<AppShell> {
     AccountPage(),
     Center(child: Text('Menu Page')),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _cartService.addListener(_onCartChanged);
+  }
+
+  @override
+  void dispose() {
+    _cartService.removeListener(_onCartChanged);
+    super.dispose();
+  }
+
+  void _onCartChanged() {
+    setState(() {});
+  }
 
   void navigateToCart() {
     setState(() {
@@ -51,6 +69,7 @@ class _AppShellState extends State<AppShell> {
           : IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _index,
+        cartCount: _cartService.totalItems,
         onTap: (value) {
           setState(() {
             _index = value;

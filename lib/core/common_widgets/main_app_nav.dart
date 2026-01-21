@@ -5,10 +5,12 @@ class AppBottomNav extends StatelessWidget {
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.cartCount = 0,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final int cartCount;
 
   @override
   Widget build(BuildContext context) {
@@ -69,23 +71,31 @@ class AppBottomNav extends StatelessWidget {
             // backgroundColor: Colors.red,
             elevation: 0,
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            destinations: const [
-              NavigationDestination(
+            destinations: [
+              const NavigationDestination(
                 icon: Icon(Icons.storefront_outlined),
                 selectedIcon: Icon(Icons.storefront),
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(Icons.shopping_cart_outlined),
-                selectedIcon: Icon(Icons.shopping_cart),
+                icon: Badge(
+                  label: Text('$cartCount'),
+                  isLabelVisible: cartCount > 0,
+                  child: const Icon(Icons.shopping_cart_outlined),
+                ),
+                selectedIcon: Badge(
+                  label: Text('$cartCount'),
+                  isLabelVisible: cartCount > 0,
+                  child: const Icon(Icons.shopping_cart),
+                ),
                 label: 'Cart',
               ),
-              NavigationDestination(
+              const NavigationDestination(
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person),
                 label: 'Profile',
               ),
-              NavigationDestination(
+              const NavigationDestination(
                 icon: Icon(Icons.menu),
                 selectedIcon: Icon(Icons.menu),
                 label: 'Menu',
