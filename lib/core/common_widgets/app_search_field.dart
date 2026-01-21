@@ -27,6 +27,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
   void _handleSelection(String selection) {
     // 1. Auto-fill the search controller
     _controller.text = selection;
+    _controller.closeView(selection);
 
     // 2. Navigate to Menu page with the query using AppShell
     final appShell = AppShell.of(context);
@@ -63,6 +64,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
                     onChanged: (_) => controller.openView(),
                     onSubmitted: (value) {
                       if (value.isNotEmpty) {
+                        controller.closeView(value);
                         _handleSelection(value);
                       }
                     },
