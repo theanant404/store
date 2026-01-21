@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:store/features/categories/data/models/category.dart';
 import 'package:store/features/home/data/home_api.dart';
+import 'package:store/features/home/presentation/widgets/home_carousel.dart';
 import 'package:store/features/navigation/app_navigation.dart';
 import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/data/product_repository.dart';
@@ -17,7 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<HomePage> {
-  final PageController _carouselController = PageController();
   final CategoryApi _categoryApi = CategoryApi();
 
   List<CategoryModel> _categories = [];
@@ -88,7 +88,7 @@ class _LandingPageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCarousel(),
+                const HomeCarousel(),
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
@@ -133,71 +133,6 @@ class _LandingPageState extends State<HomePage> {
 
           const SliverToBoxAdapter(child: SizedBox(height: 30)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCarousel() {
-    return SizedBox(
-      height: 200,
-      child: PageView.builder(
-        controller: _carouselController,
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: const LinearGradient(
-                colors: [Colors.blueAccent, Colors.purpleAccent],
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -20,
-                  bottom: -20,
-                  child: Icon(
-                    Icons.bolt,
-                    size: 150,
-                    color: Colors.white.withOpacity(0.2),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'FLASH SALE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Up to 60% off',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Limited time deals on top brands',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
