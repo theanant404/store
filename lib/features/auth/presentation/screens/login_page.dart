@@ -3,6 +3,7 @@ import 'package:store/core/common_widgets/custom_snackbar.dart';
 import 'package:store/features/auth/data/auth_api.dart';
 import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/auth/presentation/widgets/google_login_button.dart';
+import 'package:store/features/cart/data/services/cart_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -220,6 +221,9 @@ class _LoginPageState extends State<LoginPage> {
 
                                     if (!mounted) return;
                                     SessionStore.setUser(session);
+
+                                    // Load cart from API after login
+                                    CartService().loadCartFromApi();
 
                                     showSuccessSnackBar(
                                       context,

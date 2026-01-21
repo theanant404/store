@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:store/features/auth/data/auth_api.dart';
 import 'package:store/features/auth/data/session_store.dart';
+import 'package:store/features/cart/data/services/cart_service.dart';
 
 class ForgotPasswordVerifyPage extends StatefulWidget {
   const ForgotPasswordVerifyPage({super.key});
@@ -79,6 +80,10 @@ class _ForgotPasswordVerifyPageState extends State<ForgotPasswordVerifyPage> {
       SessionStore.setUser(
         UserSession.basic(name: derivedName, email: _identifier!),
       );
+
+      // Load cart from API after login
+      CartService().loadCartFromApi();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password updated, you are logged in')),
       );

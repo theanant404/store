@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:store/features/auth/data/session_store.dart';
+import 'package:store/features/cart/data/services/cart_service.dart';
 
 class LogoutButton extends StatelessWidget {
   const LogoutButton({super.key});
@@ -45,7 +46,9 @@ class LogoutButton extends StatelessWidget {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Logout?'),
-        content: const Text('Are you sure you want to log out of your e-store account?'),
+        content: const Text(
+          'Are you sure you want to log out of your e-store account?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -54,11 +57,21 @@ class LogoutButton extends StatelessWidget {
           TextButton(
             onPressed: () async {
               SessionStore.clear();
+              // Clear local cart when user logs out
+              CartService().clearCart();
               if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
               }
             },
-            child: const Text('Logout', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Logout',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
