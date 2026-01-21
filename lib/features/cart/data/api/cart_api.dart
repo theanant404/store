@@ -22,10 +22,10 @@ class CartApi {
       }
 
       final decoded = _client.decodeResponse(response);
-      
+
       // Handle both array and object responses
       final dynamic cartData = decoded['data'] ?? decoded['cart'] ?? decoded;
-      
+
       // If the response is a Map with items/cartItems property
       if (cartData is Map<String, dynamic>) {
         final itemsList = cartData['items'] ?? cartData['cartItems'] ?? [];
@@ -33,14 +33,14 @@ class CartApi {
             .map((item) => _parseCartItem(item as Map<String, dynamic>))
             .toList();
       }
-      
+
       // If the response is already a List
       if (cartData is List) {
         return cartData
             .map((item) => _parseCartItem(item as Map<String, dynamic>))
             .toList();
       }
-      
+
       // If no valid data found, return empty list
       return [];
     } catch (e) {
