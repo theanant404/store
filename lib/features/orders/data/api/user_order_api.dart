@@ -14,7 +14,7 @@ class UserOrderApi {
   Future<List<OrderModel>> getAllOrders() async {
     try {
       final response = await _client.get(_baseUrl);
-      print(response.body);
+      // print(response.body);
       if (!_client.isSuccess(response)) {
         throw Exception('Failed to fetch orders (${response.statusCode})');
       }
