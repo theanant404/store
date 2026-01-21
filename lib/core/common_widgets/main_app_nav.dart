@@ -73,8 +73,8 @@ class AppBottomNav extends StatelessWidget {
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
               const NavigationDestination(
-                icon: Icon(Icons.storefront_outlined),
-                selectedIcon: Icon(Icons.storefront),
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_filled),
                 label: 'Home',
               ),
               NavigationDestination(
@@ -90,15 +90,16 @@ class AppBottomNav extends StatelessWidget {
                 ),
                 label: 'Cart',
               ),
+
+              const NavigationDestination(
+                icon: Icon(Icons.store),
+                selectedIcon: Icon(Icons.store_mall_directory),
+                label: 'Menu',
+              ),
               const NavigationDestination(
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person),
                 label: 'Profile',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.menu),
-                selectedIcon: Icon(Icons.menu),
-                label: 'Menu',
               ),
             ],
           ),
