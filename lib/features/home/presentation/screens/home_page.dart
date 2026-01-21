@@ -84,12 +84,6 @@ class _LandingPageState extends State<HomePage> {
       backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
-            floating: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-          ),
-
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +139,7 @@ class _LandingPageState extends State<HomePage> {
 
   Widget _buildCarousel() {
     return SizedBox(
-      height: 180,
+      height: 200,
       child: PageView.builder(
         controller: _carouselController,
         itemCount: 3,
