@@ -22,11 +22,27 @@ class CartApi {
       }
 
       final decoded = _client.decodeResponse(response);
-      final cartItemsJson = decoded['data'] ?? [];
-
-      return (cartItemsJson as List)
-          .map((item) => _parseCartItem(item as Map<String, dynamic>))
-          .toList();
+      
+      // Handle both array and object responses
+      final dynamic cartData = decoded['data'] ?? decoded['cart'] ?? decoded;
+      
+      // If the response is a Map with items/cartItems property
+      if (cartData is Map<String, dynamic>) {
+        final itemsList = cartData['items'] ?? cartData['cartItems'] ?? [];
+        return (itemsList as List)
+            .map((item) => _parseCartItem(item as Map<String, dynamic>))
+            .toList();
+      }
+      
+      // If the response is already a List
+      if (cartData is List) {
+        return cartData
+            .map((item) => _parseCartItem(item as Map<String, dynamic>))
+            .toList();
+      }
+      
+      // If no valid data found, return empty list
+      return [];
     } catch (e) {
       throw Exception('Error fetching cart items: $e');
     }
