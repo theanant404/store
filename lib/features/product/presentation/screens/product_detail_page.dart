@@ -53,7 +53,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(product.title)),
+      appBar: AppBar(
+        title: Text(product.title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            final appShell = AppShell.of(context);
+            if (appShell != null) {
+              appShell.closeProductDetail();
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -201,7 +214,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           backgroundColor: Colors.green,
                         ),
                         onPressed: () {
-                          Navigator.of(context).pushNamed('/cart');
+                          // Navigate to cart tab in AppShell
+                          final appShell = AppShell.of(context);
+                          if (appShell != null) {
+                            appShell.navigateToCart();
+                          }
                         },
                         icon: const Icon(Icons.shopping_cart),
                         label: const Text('Go to Cart'),

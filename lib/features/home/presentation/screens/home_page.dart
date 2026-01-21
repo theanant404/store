@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:store/features/categories/data/models/category.dart';
 import 'package:store/features/home/data/home_api.dart';
+import 'package:store/features/navigation/app_navigation.dart';
 import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/data/product_repository.dart';
-import 'package:store/features/product/presentation/screens/product_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -398,8 +398,9 @@ class _LandingPageState extends State<HomePage> {
   }
 
   void _openProductDetail(ProductModel product) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ProductDetailPage(product: product)),
-    );
+    final appShell = AppShell.of(context);
+    if (appShell != null) {
+      appShell.showProductDetail(product);
+    }
   }
 }
