@@ -158,9 +158,10 @@ class _UserAddressPageState extends State<UserAddressPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAddressForm(),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Address'),
       ),
     );
   }

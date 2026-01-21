@@ -9,7 +9,7 @@ class AddressApi {
   final ApiClient _client;
 
   /// Base URL for the address API.
-  String get _baseUrl => '${AppConfig.apiBaseUrl}/addresses';
+  String get _baseUrl => '${AppConfig.apiBaseUrl}/user/address';
 
   /// Fetch all addresses for current user.
   Future<List<UserAddress>> fetchAddresses() async {
@@ -108,6 +108,7 @@ class AddressRepository {
   /// Add a new address via API
   static Future<UserAddress> addAddress(UserAddress address) async {
     final newAddress = await _api.createAddress(address);
+    print('Added address: $newAddress');
     _addresses.add(newAddress);
     return newAddress;
   }

@@ -17,7 +17,7 @@ class AppConfig {
       return 'http://localhost:8080/api/v1';
     }
 
-    return 'https://api.example.com/api/v1'; // Production URL
+    return 'https://e-store-backend-wheat.vercel.app/api/v1'; // Production URL
   }
 
   // Get Google Client ID from environment
