@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MenuPage extends StatelessWidget {
-  const MenuPage({
-    super.key,
-    required this.searchQuery,
-  });
+  const MenuPage({super.key, required this.searchQuery});
 
   final String searchQuery;
 
@@ -41,10 +38,7 @@ class MenuPage extends StatelessWidget {
               searchQuery.trim().isEmpty
                   ? 'Browse popular picks'
                   : 'Results for "$searchQuery"',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -61,7 +55,10 @@ class MenuPage extends StatelessWidget {
                     child: ListTile(
                       leading: const CircleAvatar(
                         backgroundColor: Color(0xFFE3F2FD),
-                        child: Icon(Icons.shopping_bag, color: Colors.blueAccent),
+                        child: Icon(
+                          Icons.shopping_bag,
+                          color: Colors.blueAccent,
+                        ),
                       ),
                       title: Text(item),
                       subtitle: const Text('Tap to view details'),
