@@ -5,6 +5,7 @@ import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/categories/presentation/screens/categories_page.dart';
 import 'package:store/features/orders/presentation/screens/orders_page.dart';
 import 'package:store/features/product/presentation/screens/products_page.dart';
+import 'package:store/features/users/presentation/screens/users_page.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -254,7 +255,13 @@ Widget _dashboardForRole(BuildContext context, String role) {
           const _DashTile(Icons.price_change_outlined, 'Pricing & Discounts'),
           const _DashTile(Icons.settings, 'Shop Setting'),
           const _DashHeader('People & Access'),
-          const _DashTile(Icons.group_outlined, 'Users & Roles'),
+          _DashTile(
+            Icons.group_outlined,
+            'Users & Roles',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const UsersPage())),
+          ),
           const _DashTile(Icons.support_agent_outlined, 'Support Tickets'),
           const _DashHeader('System'),
           const _DashTile(Icons.analytics_outlined, 'Analytics & Reports'),

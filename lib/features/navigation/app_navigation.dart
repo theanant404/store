@@ -8,6 +8,7 @@ import 'package:store/features/home/presentation/screens/home_page.dart';
 import 'package:store/features/menu/presentation/screens/menu_page.dart';
 import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/presentation/screens/product_detail_page.dart';
+import 'package:store/features/users/presentation/screens/users_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -79,6 +80,13 @@ class _AppShellState extends State<AppShell> {
     setState(() => _selectedProduct = null);
   }
 
+  void navigateToUsers() {
+    setState(() {
+      _index = 4;
+      _selectedProduct = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Now use this string to filter your list from MongoDB!
@@ -113,7 +121,7 @@ class _AppShellState extends State<AppShell> {
                         const CartPage(), 
                         MenuPage(searchQuery: _menuQuery),
                         const AccountPage(),
-                       
+                        const UsersPage(),
                       ],
                     ),
             ),
