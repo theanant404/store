@@ -6,6 +6,7 @@ import 'package:store/features/categories/presentation/screens/categories_page.d
 import 'package:store/features/delivery/presentation/screens/delivered_order_page.dart';
 import 'package:store/features/delivery/presentation/screens/delivery_page.dart';
 import 'package:store/features/orders/presentation/screens/orders_page.dart';
+import 'package:store/features/orders/presentation/screens/user_order_page.dart';
 import 'package:store/features/product/presentation/screens/products_page.dart';
 import 'package:store/features/users/presentation/screens/users_page.dart';
 
@@ -310,7 +311,13 @@ Widget _dashboardForRole(BuildContext context, String role) {
           const _DashHeader('My Account'),
           const _DashTile(Icons.person_outline, 'Profile'),
           const _DashTile(Icons.favorite_border, 'Wishlist'),
-          const _DashTile(Icons.receipt_long_outlined, 'My Orders'),
+          _DashTile(
+            Icons.receipt_long_outlined,
+            'My Orders',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const UserOrderPage())),
+          ),
           _DashTile(
             Icons.location_on_outlined,
             'Addresses',

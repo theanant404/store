@@ -7,6 +7,7 @@ import 'package:store/features/cart/presentation/screens/cart_page.dart';
 import 'package:store/features/delivery/presentation/screens/delivered_order_page.dart';
 import 'package:store/features/delivery/presentation/screens/delivery_page.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
+import 'package:store/features/orders/presentation/screens/user_order_page.dart';
 import 'package:store/features/menu/presentation/screens/menu_page.dart';
 import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/presentation/screens/product_detail_page.dart';
@@ -103,6 +104,13 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
+  void navigateToUserOrders() {
+    setState(() {
+      _index = 7;
+      _selectedProduct = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Now use this string to filter your list from MongoDB!
@@ -140,6 +148,7 @@ class _AppShellState extends State<AppShell> {
                         const UsersPage(),
                         const DeliveryPage(),
                         const DeliveredOrderPage(),
+                        const UserOrderPage(),
                       ],
                     ),
             ),
