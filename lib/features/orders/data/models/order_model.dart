@@ -17,10 +17,12 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      productId: json['productId']?.toString() ?? '',
+      productId:
+          json['productId']?.toString() ?? json['product']?.toString() ?? '',
       productTitle:
           json['productTitle'] as String? ?? json['title'] as String? ?? '',
-      varietyId: json['varietyId']?.toString() ?? '',
+      varietyId:
+          json['varietyId']?.toString() ?? json['variety']?.toString() ?? '',
       quantity: json['quantity'] as int? ?? 0,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       imageUrl: json['imageUrl'] as String?,
@@ -69,9 +71,26 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final itemsJson = json['items'] as List? ?? [];
+    final addressJson = json['addressId'] as Map<String, dynamic>?;
+    final addressString = addressJson != null
+        ? [
+                addressJson['fullName'],
+                addressJson['address'],
+                addressJson['landmarks'],
+                addressJson['village'],
+                addressJson['pincode'],
+              ]
+              .where(
+                (part) => part != null && part.toString().trim().isNotEmpty,
+              )
+              .map((part) => part.toString())
+              .join(', ')
+        : json['deliveryAddress'] as String?;
+
     return OrderModel(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? '',
+      userId:
+          json['userId']?.toString() ?? json['user']?['_id']?.toString() ?? '',
       userName:
           json['userName'] as String? ??
           json['user']?['name'] as String? ??
@@ -85,8 +104,10 @@ class OrderModel {
           .toList(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
-      deliveryAddress: json['deliveryAddress'] as String?,
-      phoneNumber: json['phoneNumber'] as String?,
+      deliveryAddress: addressString,
+      phoneNumber:
+          json['phoneNumber'] as String? ??
+          addressJson?['phoneNumber'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),

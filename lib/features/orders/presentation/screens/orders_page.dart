@@ -277,6 +277,22 @@ class _OrderCard extends StatelessWidget {
                             color: Colors.grey.shade600,
                           ),
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          order.items.isNotEmpty
+                              ? order.items
+                                    .map((item) => item.productTitle)
+                                    .where((title) => title.isNotEmpty)
+                                    .take(2)
+                                    .join(', ')
+                              : 'No items',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),

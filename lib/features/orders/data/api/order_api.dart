@@ -8,22 +8,26 @@ class OrderApi {
 
   final ApiClient _client;
 
-  String get _baseUrl => '${AppConfig.apiBaseUrl}/orders';
+  String get _baseUrl => '${AppConfig.apiBaseUrl}/admin/orders';
 
   /// Fetch all orders (admin)
   Future<List<OrderModel>> getAllOrders() async {
     try {
       final response = await _client.get(_baseUrl);
-
+      // print(response.body);
       if (!_client.isSuccess(response)) {
         throw Exception('Failed to fetch orders (${response.statusCode})');
       }
 
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-      final ordersData = decoded['data'] ?? decoded['orders'] ?? [];
+      final data = decoded['data'];
+      final ordersData = data is Map<String, dynamic>
+          ? data['orders'] ?? data['data']
+          : data;
+      final rawList = ordersData ?? decoded['orders'] ?? [];
 
-      if (ordersData is List) {
-        return ordersData
+      if (rawList is List) {
+        return rawList
             .map((order) => OrderModel.fromJson(order as Map<String, dynamic>))
             .toList();
       }
