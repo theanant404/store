@@ -25,17 +25,16 @@ class _AccountPageState extends State<AccountPage> {
             padding: const EdgeInsets.all(16),
             children: [
               // Welcome Section
-              Center(
-                child: Text(
-                  user == null ? 'Welcome!' : "",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: color.primary,
+              if (user == null) ...const [
+                SizedBox(height: 20),
+                Center(
+                  child: Icon(
+                    Icons.account_circle_outlined,
+                    size: 80,
+                    color: Colors.grey,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
+              ],
 
               // Auth Section (when not logged in)
               if (user == null) ...[
