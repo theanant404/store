@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:store/features/address/data/api/address_api.dart';
 import 'package:store/features/address/data/models/address_model.dart';
 import 'package:store/features/address/presentation/screens/address_form_page.dart';
+import 'package:store/features/auth/data/session_store.dart';
 import 'package:store/features/cart/data/models/cart_item.dart';
+import 'package:store/features/cart/data/services/cart_service.dart';
+import 'package:store/features/checkout/data/api/order_api.dart';
+import 'package:store/features/checkout/data/models/order_model.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({
@@ -21,6 +25,8 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   late Future<List<UserAddress>> _addressesFuture;
   int _selectedAddressIndex = 0;
+  bool _isPlacingOrder = false;
+  final OrderApi _orderApi = OrderApi();
 
   @override
   void initState() {
@@ -37,6 +43,81 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() {
       _addressesFuture = AddressRepository.fetchAllAddresses();
     });
+  }
+
+  Future<void> _placeOrder(List<UserAddress> addresses) async {
+    // Check if user is logged in
+    if (SessionStore.currentUser.value == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to place an order')),
+      );
+      return;
+    }
+
+    // Validate address selection
+    if (addresses.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please add a delivery address')),
+      );
+      return;
+    }
+
+    if (_selectedAddressIndex >= addresses.length) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a delivery address')),
+      );
+      return;
+    }
+
+    setState(() => _isPlacingOrder = true);
+
+    try {
+      final selectedAddress = addresses[_selectedAddressIndex];
+
+      // Convert CartItems to OrderItems
+      final orderItems = widget.selectedItems.map((cartItem) {
+        return OrderItem(
+          productId: cartItem.product.id,
+          varietyId: cartItem.variety.id,
+          productTitle: cartItem.product.title,
+          price: cartItem.variety.price,
+          quantity: cartItem.quantity,
+        );
+      }).toList();
+
+      // Create order
+      await _orderApi.createOrder(
+        items: orderItems,
+        addressId: selectedAddress.id ?? '',
+        totalAmount: widget.selectedTotal,
+        paymentMethod: 'cod',
+      );
+
+      if (!mounted) return;
+
+      // Clear cart after successful order
+      CartService().clearCart();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order placed successfully!')),
+      );
+
+      // Navigate back to home after delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error placing order: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isPlacingOrder = false);
+      }
+    }
   }
 
   void _openAddressForm({UserAddress? address}) async {
@@ -190,7 +271,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
             const SizedBox(height: 12),
             FutureBuilder<List<UserAddress>>(
-              future: AddressRepository.fetchAllAddresses(),
+              future: _addressesFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -202,80 +283,63 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                 final addresses = snapshot.data ?? [];
 
-                if (addresses.isEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'No saved addresses. Add a new address to continue.',
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-
                 return Column(
                   children: [
-                    for (int i = 0; i < addresses.length; i++)
-                      RadioListTile<int>(
-                        title: Text(addresses[i].fullName),
-                        subtitle: Text(addresses[i].address),
-                        value: i,
-                        groupValue: _selectedAddressIndex,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedAddressIndex = value ?? 0;
-                          });
-                        },
+                    if (addresses.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'No saved addresses. Add a new address to continue.',
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    else
+                      Column(
+                        children: [
+                          for (int i = 0; i < addresses.length; i++)
+                            RadioListTile<int>(
+                              title: Text(addresses[i].fullName),
+                              subtitle: Text(addresses[i].address),
+                              value: i,
+                              groupValue: _selectedAddressIndex,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedAddressIndex = value ?? 0;
+                                });
+                              },
+                            ),
+                        ],
                       ),
+                    const SizedBox(height: 24),
+                    // Place Order Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        onPressed: _isPlacingOrder ? null : () => _placeOrder(addresses),
+                        child: _isPlacingOrder
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : const Text('Place Order'),
+                      ),
+                    ),
                   ],
                 );
               },
-            ),
-            const SizedBox(height: 24),
-
-            // Payment Method
-            const Text(
-              'Payment Method',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.payment, color: Colors.grey[600]),
-                  const SizedBox(width: 12),
-                  const Text('Cash on Delivery'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Place Order Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Order placed successfully!')),
-                  );
-
-                  Future.delayed(const Duration(seconds: 2), () {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  });
-                },
-                child: const Text('Place Order'),
-              ),
             ),
           ],
         ),
