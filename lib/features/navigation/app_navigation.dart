@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/core/common_widgets/app_search_field.dart';
 import 'package:store/core/common_widgets/main_app_nav.dart';
 import 'package:store/features/account/presentation/screens/account_page.dart';
 import 'package:store/features/cart/data/services/cart_service.dart';
@@ -22,28 +23,29 @@ class _AppShellState extends State<AppShell> {
   int _index = 0;
   ProductModel? _selectedProduct;
   final CartService _cartService = CartService();
-
-  final _pages = const [
-    HomePage(),
-    CartPage(),
-    AccountPage(),
-    Center(child: Text('Menu Page')),
-  ];
+  late TextEditingController _searchController;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     _cartService.addListener(_onCartChanged);
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
     _cartService.removeListener(_onCartChanged);
     super.dispose();
   }
 
   void _onCartChanged() {
     setState(() {});
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() => _searchQuery = query);
   }
 
   void navigateToCart() {
@@ -64,9 +66,32 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _selectedProduct != null
-          ? ProductDetailPage(product: _selectedProduct!)
-          : IndexedStack(index: _index, children: _pages),
+      body: Column(
+        children: [
+          // Search Bar at Top
+          Padding(
+            padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 10),
+            child: AppSearchField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+            ),
+          ),
+          // Page Content
+          Expanded(
+            child: _selectedProduct != null
+                ? ProductDetailPage(product: _selectedProduct!)
+                : IndexedStack(
+                    index: _index,
+                    children: [
+                      HomePage(searchQuery: _searchQuery),
+                      const CartPage(),
+                      const AccountPage(),
+                      const Center(child: Text('Menu Page')),
+                    ],
+                  ),
+          ),
+        ],
+      ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _index,
         cartCount: _cartService.totalItems,

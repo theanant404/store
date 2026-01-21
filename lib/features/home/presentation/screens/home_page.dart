@@ -8,7 +8,9 @@ import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/data/product_repository.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, this.searchQuery = ''});
+
+  final String searchQuery;
 
   @override
   State<HomePage> createState() => _LandingPageState();
@@ -22,6 +24,20 @@ class _LandingPageState extends State<HomePage> {
   bool _isLoadingCategories = false;
   List<ProductModel> _products = [];
   bool _isLoadingProducts = false;
+
+  /// Get filtered products based on search query
+  List<ProductModel> get _filteredProducts {
+    if (widget.searchQuery.isEmpty) {
+      return _products;
+    }
+    return _products
+        .where(
+          (product) => product.title.toLowerCase().contains(
+            widget.searchQuery.toLowerCase(),
+          ),
+        )
+        .toList();
+  }
 
   @override
   void initState() {
@@ -70,25 +86,8 @@ class _LandingPageState extends State<HomePage> {
         slivers: [
           const SliverAppBar(
             floating: true,
-            title: Text(
-              'E-Store',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
             backgroundColor: Colors.white,
             elevation: 0,
-            actions: [
-              IconButton(
-                onPressed: null,
-                icon: Icon(Icons.search, color: Colors.black),
-              ),
-              IconButton(
-                onPressed: null,
-                icon: Icon(Icons.notifications_none, color: Colors.black),
-              ),
-            ],
           ),
 
           SliverToBoxAdapter(
@@ -284,11 +283,17 @@ class _LandingPageState extends State<HomePage> {
       );
     }
 
-    if (_products.isEmpty) {
-      return const SliverToBoxAdapter(
+    if (_filteredProducts.isEmpty) {
+      return SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 32),
-          child: Center(child: Text('No products available')),
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Center(
+            child: Text(
+              widget.searchQuery.isEmpty
+                  ? 'No products available'
+                  : 'No products found for "${widget.searchQuery}"',
+            ),
+          ),
         ),
       );
     }
@@ -301,8 +306,8 @@ class _LandingPageState extends State<HomePage> {
         mainAxisSpacing: 16,
       ),
       delegate: SliverChildBuilderDelegate(
-        (context, index) => _buildProductCard(_products[index]),
-        childCount: _products.length,
+        (context, index) => _buildProductCard(_filteredProducts[index]),
+        childCount: _filteredProducts.length,
       ),
     );
   }
