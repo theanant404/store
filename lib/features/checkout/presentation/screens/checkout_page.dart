@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:store/features/address/data/api/address_api.dart';
+import 'package:store/features/address/data/models/address_model.dart';
+import 'package:store/features/address/presentation/screens/address_form_page.dart';
 import 'package:store/features/cart/data/models/cart_item.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -16,30 +19,57 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  late TextEditingController _nameController;
-  late TextEditingController _phoneController;
-  late TextEditingController _addressController;
-  late TextEditingController _cityController;
-  late TextEditingController _pincodeController;
+  late Future<List<UserAddress>> _addressesFuture;
+  int _selectedAddressIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _phoneController = TextEditingController();
-    _addressController = TextEditingController();
-    _cityController = TextEditingController();
-    _pincodeController = TextEditingController();
+    _addressesFuture = AddressRepository.fetchAllAddresses();
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    _cityController.dispose();
-    _pincodeController.dispose();
     super.dispose();
+  }
+
+  void _refreshAddresses() {
+    setState(() {
+      _addressesFuture = AddressRepository.fetchAllAddresses();
+    });
+  }
+
+  void _openAddressForm({UserAddress? address}) async {
+    final result = await Navigator.push<UserAddress?>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            AddressFormPage(address: address, isEditing: address != null),
+      ),
+    );
+
+    if (result != null) {
+      try {
+        if (address != null) {
+          // Update existing address
+          await AddressRepository.updateAddress(result);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Address updated successfully')),
+          );
+        } else {
+          // Create new address
+          await AddressRepository.addAddress(result);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Address added successfully')),
+          );
+        }
+        _refreshAddresses();
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
   }
 
   @override
@@ -142,71 +172,67 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
             const SizedBox(height: 24),
 
-            // Delivery Address Form
-            const Text(
-              'Delivery Address',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                hintText: 'Full Name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _phoneController,
-              decoration: InputDecoration(
-                hintText: 'Phone Number',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _addressController,
-              decoration: InputDecoration(
-                hintText: 'Address',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 12),
+            // Delivery Address Section
+            const SizedBox(height: 24),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _cityController,
-                    decoration: InputDecoration(
-                      hintText: 'City',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+                const Text(
+                  'Delivery Address',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _pincodeController,
-                    decoration: InputDecoration(
-                      hintText: 'Pincode',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
+                OutlinedButton.icon(
+                 onPressed: () => _openAddressForm(),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add New'),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            FutureBuilder<List<UserAddress>>(
+              future: AddressRepository.fetchAllAddresses(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                final addresses = snapshot.data ?? [];
+
+                if (addresses.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[300]!),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'No saved addresses. Add a new address to continue.',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    for (int i = 0; i < addresses.length; i++)
+                      RadioListTile<int>(
+                        title: Text(addresses[i].fullName),
+                        subtitle: Text(addresses[i].address),
+                        value: i,
+                        groupValue: _selectedAddressIndex,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedAddressIndex = value ?? 0;
+                          });
+                        },
+                      ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 24),
 
@@ -240,19 +266,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () {
-                  if (_nameController.text.isEmpty ||
-                      _phoneController.text.isEmpty ||
-                      _addressController.text.isEmpty ||
-                      _cityController.text.isEmpty ||
-                      _pincodeController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please fill in all fields'),
-                      ),
-                    );
-                    return;
-                  }
-
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Order placed successfully!')),
                   );
