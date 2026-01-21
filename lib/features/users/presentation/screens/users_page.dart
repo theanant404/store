@@ -12,7 +12,7 @@ class UsersPage extends StatefulWidget {
 class _UsersPageState extends State<UsersPage> {
   final UserApi _userApi = UserApi();
   late Future<List<UserModel>> _usersFuture;
-  String _selectedRoleFilter = 'all'; // all, user, admin, staff, DELHIVERY
+  String _selectedRoleFilter = 'all'; // all, user, admin, staff, delhivery
 
   @override
   void initState() {
@@ -181,70 +181,136 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   Future<void> _showUserEditDialog(BuildContext context, UserModel user) {
+    String selectedRole = user.role.toUpperCase();
+    List<String> roles = ['USER', 'ADMIN', 'STAFF', 'DELHIVERY'];
+
+    // Ensure selected role is in the list
+    if (!roles.contains(selectedRole)) {
+      selectedRole = 'USER';
+    }
+
     return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Edit ${user.name}'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Email: ${user.email}',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Change Role:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              _buildRoleButton(context, user, 'user'),
-              _buildRoleButton(context, user, 'admin'),
-              _buildRoleButton(context, user, 'staff'),
-              _buildRoleButton(context, user, 'DELHIVERY'),
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              const Text(
-                'Account Status:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              if (user.isBlocked)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _unblockUser(context, user),
-                    icon: const Icon(Icons.lock_open),
-                    label: const Text('Unblock User'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: Text('Edit ${user.name}'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Email: ${user.email}',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Change Role:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: StatefulBuilder(
+                      builder: (context, setDropdownState) {
+                        return DropdownButton<String>(
+                          value: selectedRole,
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          items: roles.map((String role) {
+                            return DropdownMenuItem<String>(
+                              value: role,
+                              child: Text(
+                                role == 'DELHIVERY'
+                                    ? 'Delhivery'
+                                    : role.capitalize(),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? newRole) {
+                            if (newRole != null) {
+                              setDropdownState(() {
+                                selectedRole = newRole;
+                              });
+                            }
+                          },
+                        );
+                      },
                     ),
                   ),
-                )
-              else
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _blockUser(context, user),
-                    icon: const Icon(Icons.lock),
-                    label: const Text('Block User'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: () => _updateRole(context, user, selectedRole),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                      child: const Text(
+                        'Update Role',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Account Status:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  if (user.isBlocked)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _unblockUser(context, user),
+                        icon: const Icon(Icons.lock_open),
+                        label: const Text('Unblock User'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _blockUser(context, user),
+                        icon: const Icon(Icons.lock),
+                        label: const Text(
+                          'Block User',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -286,11 +352,15 @@ class _UsersPageState extends State<UsersPage> {
     String newRole,
   ) async {
     try {
-      await _userApi.updateUserRole(user.id, newRole);
+      // Convert to uppercase format for API
+      final apiRole = newRole.toUpperCase();
+      await _userApi.updateUserRole(user.id, apiRole);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${user.name} role updated to $newRole'),
+            content: Text(
+              '${user.name} role updated to ${newRole == 'DELHIVERY' ? 'Delhivery' : newRole}',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -511,8 +581,15 @@ class _UserCard extends StatelessWidget {
               height: 40,
               child: ElevatedButton.icon(
                 onPressed: onEdit,
-                icon: const Icon(Icons.edit, size: 16),
-                label: const Text('Edit'),
+                icon: const Icon(Icons.edit, size: 16, color: Colors.white),
+                label: const Text(
+                  'Edit',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   shape: RoundedRectangleBorder(

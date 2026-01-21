@@ -14,7 +14,6 @@ class UserApi {
   Future<List<UserModel>> getAllUsers() async {
     try {
       final response = await _client.get(_baseUrl);
-
       if (!_client.isSuccess(response)) {
         throw Exception('Failed to fetch users (${response.statusCode})');
       }
@@ -45,7 +44,7 @@ class UserApi {
         '$_baseUrl/$userId/role',
         body: {'role': role},
       );
-
+      print(response.body);
       if (!_client.isSuccess(response)) {
         throw Exception('Failed to update user role (${response.statusCode})');
       }
@@ -67,7 +66,7 @@ class UserApi {
     try {
       final response = await _client.patch(
         '$_baseUrl/$userId/block',
-        body: {'isBlocked': true},
+        body: {'blocked': true},
       );
 
       if (!_client.isSuccess(response)) {
@@ -85,6 +84,7 @@ class UserApi {
         '$_baseUrl/$userId/unblock',
         body: {'isBlocked': false},
       );
+      // print(response.body);
 
       if (!_client.isSuccess(response)) {
         throw Exception('Failed to unblock user (${response.statusCode})');
