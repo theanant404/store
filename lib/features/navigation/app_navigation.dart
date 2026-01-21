@@ -5,9 +5,9 @@ import 'package:store/features/account/presentation/screens/account_page.dart';
 import 'package:store/features/cart/data/services/cart_service.dart';
 import 'package:store/features/cart/presentation/screens/cart_page.dart';
 import 'package:store/features/home/presentation/screens/home_page.dart';
+import 'package:store/features/menu/presentation/screens/menu_page.dart';
 import 'package:store/features/product/data/model/product.dart';
 import 'package:store/features/product/presentation/screens/product_detail_page.dart';
-import 'package:store/features/navigation/menu_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -81,6 +81,7 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Now use this string to filter your list from MongoDB!
     return Scaffold(
       body: SafeArea(
         bottom: false, // keep bottom nav flush to screen
@@ -88,11 +89,17 @@ class _AppShellState extends State<AppShell> {
           children: [
             // Search Bar at Top
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical:0),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               child: AppSearchField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                onSubmitted: navigateToMenuWithQuery,
+                // Triggered when a suggestion is clicked OR when "Search" is pressed on keyboard
+                onFilterTap: () {
+                  // Logic for opening your Filter Bottom Sheet
+                  print("Filter tapped");
+                },
+                onNotificationTap: () {
+                  // Navigate to your notification screen
+                  Navigator.pushNamed(context, '/notifications');
+                },
               ),
             ),
             // Page Content
