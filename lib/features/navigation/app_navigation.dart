@@ -66,31 +66,34 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          // Search Bar at Top
-          Padding(
-            padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 10),
-            child: AppSearchField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
+      body: SafeArea(
+        bottom: false, // keep bottom nav flush to screen
+        child: Column(
+          children: [
+            // Search Bar at Top
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical:0),
+              child: AppSearchField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+              ),
             ),
-          ),
-          // Page Content
-          Expanded(
-            child: _selectedProduct != null
-                ? ProductDetailPage(product: _selectedProduct!)
-                : IndexedStack(
-                    index: _index,
-                    children: [
-                      HomePage(searchQuery: _searchQuery),
-                      const CartPage(),
-                      const AccountPage(),
-                      const Center(child: Text('Menu Page')),
-                    ],
-                  ),
-          ),
-        ],
+            // Page Content
+            Expanded(
+              child: _selectedProduct != null
+                  ? ProductDetailPage(product: _selectedProduct!)
+                  : IndexedStack(
+                      index: _index,
+                      children: [
+                        HomePage(searchQuery: _searchQuery),
+                        const CartPage(),
+                        const AccountPage(),
+                        const Center(child: Text('Menu Page')),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _index,
