@@ -94,7 +94,7 @@ class _AppShellState extends State<AppShell> {
                 // Triggered when a suggestion is clicked OR when "Search" is pressed on keyboard
                 onFilterTap: () {
                   // Logic for opening your Filter Bottom Sheet
-                  print("Filter tapped");
+                  // print("Filter tapped");
                 },
                 onNotificationTap: () {
                   // Navigate to your notification screen
@@ -110,9 +110,10 @@ class _AppShellState extends State<AppShell> {
                       index: _index,
                       children: [
                         HomePage(searchQuery: _searchQuery),
-                        const CartPage(),
-                        const AccountPage(),
+                        const CartPage(), 
                         MenuPage(searchQuery: _menuQuery),
+                        const AccountPage(),
+                       
                       ],
                     ),
             ),
