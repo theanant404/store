@@ -14,7 +14,6 @@ class AppSearchField extends StatefulWidget {
 class _AppSearchFieldState extends State<AppSearchField> {
   final SearchController _controller = SearchController();
 
-  // Simulated product list from your database
   final List<String> _products = [
     'iPhone 15 Pro',
     'Samsung S24 Ultra',
@@ -24,14 +23,33 @@ class _AppSearchFieldState extends State<AppSearchField> {
     'Sony WH-1000XM5',
   ];
 
-  void _handleSelection(String selection) {
-    // 1. Auto-fill the search controller
-    _controller.text = selection;
-    _controller.closeView(selection);
+  void _clearSearch() {
+    _controller.clear();
+    // Use the controller's built-in view management
+    if (_controller.isOpen) {
+      _controller.openView(); // Refresh suggestions
+    }
+    setState(() {});
+  }
 
-    // 2. Navigate to Menu page with the query using AppShell
-    final appShell = AppShell.of(context);
-    appShell?.navigateToMenuWithQuery(selection);
+  void _handleSelection(String selection) {
+    // 1. Update text
+    _controller.text = selection;
+
+    // 2. CRITICAL: Close the suggestion view properly
+    if (_controller.isOpen) {
+      _controller.closeView(selection);
+    }
+
+    // 3. Remove keyboard focus
+    FocusScope.of(context).unfocus();
+
+    // 4. Navigate using your AppShell logic
+    // Using a microtask ensures the UI has finished closing the overlay
+    Future.microtask(() {
+      final appShell = AppShell.of(context);
+      appShell?.navigateToMenuWithQuery(selection);
+    });
   }
 
   @override
@@ -43,58 +61,60 @@ class _AppSearchFieldState extends State<AppSearchField> {
           Expanded(
             child: SearchAnchor(
               searchController: _controller,
-              // This builds the search bar appearance
+              viewHintText: 'Search products...',
+              // The search bar in its idle state
               builder: (context, controller) {
-                return Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.08),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: controller,
-                    onTap: () => controller.openView(), // Opens suggestions
-                    onChanged: (_) => controller.openView(),
-                    onSubmitted: (value) {
-                      if (value.isNotEmpty) {
-                        controller.closeView(value);
-                        _handleSelection(value);
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Search products...',
-                      prefixIcon: const Icon(
-                        Icons.search_rounded,
-                        color: Colors.blueAccent,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(
-                          Icons.tune_rounded,
-                          color: Colors.blueAccent,
-                        ),
-                        onPressed: widget.onFilterTap,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                return SearchBar(
+                  controller: controller,
+                  onTap: () => controller.openView(),
+                  onChanged: (_) => controller.openView(),
+                  onSubmitted: (value) => _handleSelection(value),
+                  hintText: 'Search products...',
+                  elevation: WidgetStateProperty.all(0),
+                  backgroundColor: WidgetStateProperty.all(Colors.white),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
+                  side: WidgetStateProperty.all(BorderSide.none),
+                  // Custom styling to match your attractive design
+                  padding: const WidgetStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.symmetric(horizontal: 12.0),
+                  ),
+                  leading: const Icon(
+                    Icons.search_rounded,
+                    color: Colors.blueAccent,
+                  ),
+                  trailing: [
+                    if (_controller.text.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.grey,
+                        ),
+                        onPressed: _clearSearch,
+                      ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.tune_rounded,
+                        color: Colors.blueAccent,
+                      ),
+                      onPressed: widget.onFilterTap,
+                    ),
+                  ],
                 );
               },
-              // This builds the suggestion list "small screen"
+              // The suggestion logic
               suggestionsBuilder: (context, controller) {
                 final String input = controller.value.text.toLowerCase();
-
-                // Filter the list based on user typing
                 final filteredItems = _products
                     .where((item) => item.toLowerCase().contains(input))
                     .toList();
+
+                if (filteredItems.isEmpty) {
+                  return [const ListTile(title: Text("No suggestions found"))];
+                }
 
                 return filteredItems.map(
                   (item) => ListTile(
@@ -107,10 +127,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
               },
             ),
           ),
-
           const SizedBox(width: 15),
-
-          // Notification Icon (remains the same)
           _buildNotificationButton(),
         ],
       ),
