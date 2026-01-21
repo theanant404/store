@@ -374,7 +374,7 @@ class _LandingPageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${price.toStringAsFixed(2)}',
+                    '₹${price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: Colors.blueAccent,
                       fontWeight: FontWeight.bold,

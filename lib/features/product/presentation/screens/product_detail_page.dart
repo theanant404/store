@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:store/features/cart/data/services/cart_service.dart';
+import 'package:store/features/navigation/app_navigation.dart';
 import 'package:store/features/product/data/model/product.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -24,6 +25,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     _selectedVariety = widget.product.varieties.isNotEmpty
         ? widget.product.varieties.first
         : ProductVariety(id: '0', price: 0);
+    _cartService.addListener(_onCartChanged);
+  }
+
+  @override
+  void dispose() {
+    _cartService.removeListener(_onCartChanged);
+    super.dispose();
+  }
+
+  void _onCartChanged() {
+    setState(() {});
+  }
+
+  bool _isProductInCart() {
+    return _cartService.items.any(
+      (item) =>
+          item.product.id == product.id &&
+          item.variety.id == _selectedVariety.id,
+    );
   }
 
   ProductModel get product => widget.product;
@@ -144,31 +164,78 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              onPressed: _selectedVariety.stock > 0
-                  ? () {
-                      _cartService.addItem(
-                        product: product,
-                        variety: _selectedVariety,
-                        quantity: _quantity,
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Added $_quantity item(s) to cart'),
-                          duration: const Duration(seconds: 2),
+          child: _isProductInCart()
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                      );
-                    }
-                  : null,
-              icon: const Icon(Icons.add_shopping_cart),
-              label: const Text('Add to Cart'),
-            ),
-          ),
+                        onPressed: _selectedVariety.stock > 0
+                            ? () {
+                                _cartService.addItem(
+                                  product: product,
+                                  variety: _selectedVariety,
+                                  quantity: _quantity,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Added $_quantity item(s) to cart',
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            : null,
+                        icon: const Icon(Icons.add_shopping_cart),
+                        label: const Text('Add to Cart'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: Colors.green,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/cart');
+                        },
+                        icon: const Icon(Icons.shopping_cart),
+                        label: const Text('Go to Cart'),
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: _selectedVariety.stock > 0
+                        ? () {
+                            _cartService.addItem(
+                              product: product,
+                              variety: _selectedVariety,
+                              quantity: _quantity,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Added $_quantity item(s) to cart',
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.add_shopping_cart),
+                    label: const Text('Add to Cart'),
+                  ),
+                ),
         ),
       ),
     );

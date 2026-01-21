@@ -7,6 +7,10 @@ import 'package:store/features/home/presentation/screens/home_page.dart';
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
+  static _AppShellState? of(BuildContext context) {
+    return context.findAncestorStateOfType<_AppShellState>();
+  }
+
   @override
   State<AppShell> createState() => _AppShellState();
 }
@@ -19,6 +23,11 @@ class _AppShellState extends State<AppShell> {
     AccountPage(), // Profile page
     Center(child: Text('Menu Page')), // Placeholder for Menu
   ];
+
+  void navigateToCart() {
+    setState(() => _index = 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
