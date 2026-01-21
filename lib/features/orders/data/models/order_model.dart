@@ -52,6 +52,7 @@ class OrderModel {
   status; // pending, accepted, preparing, shipped, delivered, cancelled
   final String? deliveryAddress;
   final String? phoneNumber;
+  final String? otp;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -65,13 +66,14 @@ class OrderModel {
     required this.status,
     this.deliveryAddress,
     this.phoneNumber,
+    this.otp,
     required this.createdAt,
     this.updatedAt,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final itemsJson = json['items'] as List? ?? [];
-    // addressId is a string in your backend response
+    // addressId is a string or object in your backend response
     final addressString =
         json['addressId']?.toString() ?? json['deliveryAddress'] as String?;
 
@@ -87,6 +89,7 @@ class OrderModel {
       status: json['status'] as String? ?? 'pending',
       deliveryAddress: addressString,
       phoneNumber: json['phoneNumber'] as String?,
+      otp: json['otp']?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
@@ -107,6 +110,7 @@ class OrderModel {
       'status': status,
       if (deliveryAddress != null) 'deliveryAddress': deliveryAddress,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      if (otp != null) 'otp': otp,
       'createdAt': createdAt.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
@@ -122,6 +126,7 @@ class OrderModel {
     String? status,
     String? deliveryAddress,
     String? phoneNumber,
+    String? otp,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -135,6 +140,7 @@ class OrderModel {
       status: status ?? this.status,
       deliveryAddress: deliveryAddress ?? this.deliveryAddress,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      otp: otp ?? this.otp,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -35,14 +35,10 @@ class _UserOrderPageState extends State<UserOrderPage> {
     return orders.where((order) => order.status == _filterStatus).toList();
   }
 
-
-
   String _getStatusLabel(String status) {
     switch (status) {
       case 'pending':
         return 'Pending';
-      case 'accepted':
-        return 'Accepted';
       case 'confirmed':
         return 'Confirmed';
       case 'preparing':
@@ -62,8 +58,6 @@ class _UserOrderPageState extends State<UserOrderPage> {
     switch (status) {
       case 'pending':
         return Colors.orange;
-      case 'accepted':
-        return Colors.blue;
       case 'confirmed':
         return Colors.blue;
       case 'preparing':
@@ -432,6 +426,24 @@ class UserOrderDetailPage extends StatefulWidget {
 }
 
 class _UserOrderDetailPageState extends State<UserOrderDetailPage> {
+  // Format the address for display
+  String _formatAddress(dynamic address) {
+    if (address == null) return 'Address not available';
+    if (address is Map<String, dynamic>) {
+      final fullName = address['fullName'] ?? '';
+      final addr = address['address'] ?? '';
+      final landmarks = address['landmarks'] ?? '';
+      final village = address['village'] ?? '';
+      final pincode = address['pincode'] ?? '';
+      final parts = [fullName, addr, landmarks, village, pincode]
+          .where((part) => part != null && part.toString().trim().isNotEmpty)
+          .map((part) => part.toString())
+          .toList();
+      return parts.isNotEmpty ? parts.join(', ') : 'Address not available';
+    }
+    return address.toString().split(',').join(', '); // If it's a string
+  }
+
   final UserOrderApi _orderApi = UserOrderApi();
   late OrderModel _order;
   bool _isLoading = false;
@@ -452,8 +464,6 @@ class _UserOrderDetailPageState extends State<UserOrderDetailPage> {
     switch (status) {
       case 'pending':
         return 'Pending';
-      case 'accepted':
-        return 'Accepted';
       case 'confirmed':
         return 'Confirmed';
       case 'preparing':
@@ -473,8 +483,6 @@ class _UserOrderDetailPageState extends State<UserOrderDetailPage> {
     switch (status) {
       case 'pending':
         return Colors.orange;
-      case 'accepted':
-        return Colors.blue;
       case 'confirmed':
         return Colors.blue;
       case 'preparing':
@@ -625,20 +633,56 @@ class _UserOrderDetailPageState extends State<UserOrderDetailPage> {
                   _buildOrderTimeline(),
 
                   // Delivery Details
-                  if (_order.deliveryAddress != null)
-                    _buildSection('Delivery Details', [
-                      _buildInfoRow(
-                        Icons.location_on,
-                        'Address',
-                        _order.deliveryAddress!,
-                      ),
-                      if (_order.phoneNumber != null)
-                        _buildInfoRow(
-                          Icons.phone,
-                          'Phone',
-                          _order.phoneNumber!,
+                  // if (_order.deliveryAddress != null)
+                  //   _buildSection('Delivery Details', [
+                  //     _buildInfoRow(
+                  //       Icons.location_on,
+                  //       'Address',
+                  //       _formatAddress(_order.deliveryAddress),
+                  //     ),
+                  //     if (_order.phoneNumber != null)
+                  //       _buildInfoRow(
+                  //         Icons.phone,
+                  //         'Phone',
+                  //         _order.phoneNumber!,
+                  //       ),
+
+                  //   ]),
+                  if (_order.otp != null && _order.otp.toString().isNotEmpty)
+                    Column(
+                      children: [
+                        Center(
+                          child: Text(
+                            'Delivery OTP',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                         ),
-                    ]),
+                        const SizedBox(height: 8),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _order.otp!,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
                   // Order Items
                   _buildSection(
@@ -751,47 +795,72 @@ class _UserOrderDetailPageState extends State<UserOrderDetailPage> {
             'Delivery Progress',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           SizedBox(
-            height: 60,
+            height: 80,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(statuses.length, (index) {
                 final status = statuses[index];
                 final isActive = !isCancelled && currentIndex >= index;
                 final label = _getStatusLabel(status);
-
+                final isLast = index == statuses.length - 1;
                 return Expanded(
                   child: Column(
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isActive ? Colors.green : Colors.grey.shade300,
-                        ),
-                        child: Center(
-                          child: isActive
-                              ? const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 20,
-                                )
-                              : Text(
-                                  '${index + 1}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isActive
+                                  ? Colors.green
+                                  : Colors.grey.shade300,
+                              border: Border.all(
+                                color: isActive
+                                    ? Colors.green
+                                    : Colors.grey.shade400,
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: isActive
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 14,
+                                    )
+                                  : Text(
+                                      '${index + 1}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          if (!isLast)
+                            Expanded(
+                              child: Container(
+                                height: 4,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 2,
                                 ),
-                        ),
+                                color: isActive && currentIndex > index
+                                    ? Colors.green
+                                    : Colors.grey.shade300,
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(
                         label,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: isActive
                               ? FontWeight.bold
                               : FontWeight.normal,
