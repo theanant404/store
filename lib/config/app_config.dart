@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 class AppConfig {
   // Get API base URL from environment or use default
   static String get apiBaseUrl {
-    const envUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    print('envUrl: $envUrl');
     if (envUrl.isNotEmpty) {
       if (kDebugMode) {
-        print('✅ API Base URL loaded: $envUrl');
+        // print('✅ API Base URL loaded: $envUrl');
       }
       return envUrl;
     }
@@ -14,10 +15,10 @@ class AppConfig {
     // Default based on environment
     if (kDebugMode) {
       print('⚠️ Using default API URL for development');
-      return 'http://localhost:8080/api/v1';
+      return 'http://localhost:8000/api/v1';
     }
 
-    return 'https://e-store-backend-wheat.vercel.app/api/v1'; // Production URL
+    return 'http://localhost:8000/api/v1'; // Production URL
   }
 
   // Get Google Client ID from environment
