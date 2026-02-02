@@ -77,7 +77,7 @@ class _LoginWithOtpPageState extends State<LoginWithOtpPage> {
       final derivedName = _looksLikeEmail(_identifier!)
           ? _identifier!.split('@').first
           : _identifier!;
-      SessionStore.setUser(
+      await SessionStore.setUser(
         UserSession.basic(name: derivedName, email: _identifier!),
       );
 

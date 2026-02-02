@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                                     );
 
                                     if (!mounted) return;
-                                    SessionStore.setUser(session);
+                                    await SessionStore.setUser(session);
 
                                     // Load cart from API after login
                                     CartService().loadCartFromApi();

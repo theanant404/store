@@ -56,7 +56,7 @@ class LogoutButton extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              SessionStore.clear();
+              await SessionStore.clear();
               // Clear local cart when user logs out
               CartService().clearCart();
               if (context.mounted) {
