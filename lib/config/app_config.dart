@@ -5,9 +5,9 @@ class AppConfig {
   static String get apiBaseUrl {
     const envUrl = String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: "http://localhost:8080/api/v1",
+      defaultValue: "https://e-store-api-beige.vercel.app/api/v1",
     );
-    print('envUrl: $envUrl');
+    // print('envUrl: $envUrl');
     if (envUrl.isNotEmpty) {
       if (kDebugMode) {
         // print('✅ API Base URL loaded: $envUrl');
@@ -18,10 +18,10 @@ class AppConfig {
     // Default based on environment
     if (kDebugMode) {
       print('⚠️ Using default API URL for development');
-      return 'http://localhost:8080/api/v1';
+      return 'https://e-store-api-beige.vercel.app/api/v1';
     }
 
-    return 'http://localhost:8000/api/v1'; // Production URL
+    return 'https://e-store-api-beige.vercel.app/api/v1'; // Production URL
   }
 
   // Get Google Client ID from environment
