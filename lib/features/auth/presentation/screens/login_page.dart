@@ -229,7 +229,12 @@ class _LoginPageState extends State<LoginPage> {
                                       context,
                                       message: "Login Successful",
                                     );
-                                    Navigator.of(context).pop();
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamedAndRemoveUntil(
+                                      '/',
+                                      (route) => false,
+                                    );
                                   } catch (e) {
                                     if (!mounted) return;
                                     showErrorSnackBar(

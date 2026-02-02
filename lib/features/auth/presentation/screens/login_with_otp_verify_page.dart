@@ -87,7 +87,7 @@ class _LoginWithOtpPageState extends State<LoginWithOtpPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('OTP verified, logged in')));
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
