@@ -271,7 +271,10 @@ class _OrderCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          order.userName,
+                          (order.userName.isNotEmpty &&
+                                  order.userName.toLowerCase() != 'unknown')
+                              ? order.userName
+                              : 'No Name',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade600,

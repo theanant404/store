@@ -3,7 +3,10 @@ import 'package:flutter/foundation.dart';
 class AppConfig {
   // Get API base URL from environment or use default
   static String get apiBaseUrl {
-    const envUrl = String.fromEnvironment('API_BASE_URL');
+    const envUrl = String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: "http://localhost:8080/api/v1",
+    );
     print('envUrl: $envUrl');
     if (envUrl.isNotEmpty) {
       if (kDebugMode) {
@@ -15,7 +18,7 @@ class AppConfig {
     // Default based on environment
     if (kDebugMode) {
       print('⚠️ Using default API URL for development');
-      return 'http://localhost:8000/api/v1';
+      return 'http://localhost:8080/api/v1';
     }
 
     return 'http://localhost:8000/api/v1'; // Production URL

@@ -73,22 +73,58 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final itemsJson = json['items'] as List? ?? [];
-    // addressId is a string or object in your backend response
-    final addressString =
-        json['addressId']?.toString() ?? json['deliveryAddress'] as String?;
+
+    // Handle user object or flat fields
+    String userId = '';
+    String userName = '';
+    String userEmail = '';
+    final userField = json['user'];
+    if (userField is Map<String, dynamic>) {
+      userId = userField['_id']?.toString() ?? '';
+      userName = userField['name']?.toString() ?? '';
+      userEmail = userField['email']?.toString() ?? '';
+    } else {
+      userId = json['userId']?.toString() ?? json['user']?.toString() ?? '';
+      userName = json['userName']?.toString() ?? '';
+      userEmail = json['userEmail']?.toString() ?? '';
+    }
+
+    // Handle addressId object or string
+    String? deliveryAddress;
+    String? phoneNumber;
+    final addressField = json['addressId'] ?? json['deliveryAddress'];
+    if (addressField is Map<String, dynamic>) {
+      // Compose a full address string
+      final fullName = addressField['fullName'] ?? '';
+      final phone = addressField['phoneNumber'] ?? '';
+      final address = addressField['address'] ?? '';
+      final landmarks = addressField['landmarks'] ?? '';
+      final village = addressField['village'] ?? '';
+      final pincode = addressField['pincode'] ?? '';
+      deliveryAddress = [
+        if (fullName.isNotEmpty) fullName,
+        if (address.isNotEmpty) address,
+        if (landmarks.isNotEmpty) 'Landmark: $landmarks',
+        if (village.isNotEmpty) 'Village: $village',
+        if (pincode.isNotEmpty) 'Pincode: $pincode',
+      ].join(', ');
+      phoneNumber = phone.toString();
+    } else if (addressField is String) {
+      deliveryAddress = addressField;
+    }
 
     return OrderModel(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? json['user']?.toString() ?? '',
-      userName: json['userName'] as String? ?? 'Unknown',
-      userEmail: json['userEmail'] as String? ?? '',
+      userId: userId,
+      userName: userName.isNotEmpty ? userName : 'Unknown',
+      userEmail: userEmail,
       items: itemsJson
           .map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
           .toList(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
-      deliveryAddress: addressString,
-      phoneNumber: json['phoneNumber'] as String?,
+      deliveryAddress: deliveryAddress,
+      phoneNumber: phoneNumber ?? json['phoneNumber'] as String?,
       otp: json['otp']?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'].toString())

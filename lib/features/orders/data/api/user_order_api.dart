@@ -26,7 +26,7 @@ class UserOrderApi {
           .map((order) => OrderModel.fromJson(order as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      print('Error fetching orders: $e');
+      // print('Error fetching orders: $e');
       throw Exception('Error fetching orders: $e');
     }
   }
@@ -35,7 +35,7 @@ class UserOrderApi {
   Future<OrderModel> getOrderById(String orderId) async {
     try {
       final response = await _client.get('$_baseUrl/$orderId');
-
+      // print(response.body);
       if (!_client.isSuccess(response)) {
         throw Exception('Failed to fetch order (${response.statusCode})');
       }

@@ -633,21 +633,20 @@ class _UserOrderDetailPageState extends State<UserOrderDetailPage> {
                   _buildOrderTimeline(),
 
                   // Delivery Details
-                  // if (_order.deliveryAddress != null)
-                  //   _buildSection('Delivery Details', [
-                  //     _buildInfoRow(
-                  //       Icons.location_on,
-                  //       'Address',
-                  //       _formatAddress(_order.deliveryAddress),
-                  //     ),
-                  //     if (_order.phoneNumber != null)
-                  //       _buildInfoRow(
-                  //         Icons.phone,
-                  //         'Phone',
-                  //         _order.phoneNumber!,
-                  //       ),
-
-                  //   ]),
+                  if (_order.deliveryAddress != null)
+                    _buildSection('Delivery Details', [
+                      _buildInfoRow(
+                        Icons.location_on,
+                        'Address',
+                        _formatAddress(_order.deliveryAddress),
+                      ),
+                      if (_order.phoneNumber != null)
+                        _buildInfoRow(
+                          Icons.phone,
+                          'Phone',
+                          _order.phoneNumber!,
+                        ),
+                    ]),
                   if (_order.otp != null && _order.otp.toString().isNotEmpty)
                     Column(
                       children: [
